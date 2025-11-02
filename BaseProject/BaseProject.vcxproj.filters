@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="imgui.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_dx11.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_win32.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="_model.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometory.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshBuffer.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Model_anime.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Model_check.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Model_get.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Model_morph.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Code\Work</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX.cpp">
+      <Filter>Code\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Startup.cpp">
+      <Filter>Code\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Code\App</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_dx11.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_win32.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>Code\Work\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometory.h">
+      <Filter>Code\Work</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Code\Work</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshBuffer.h">
+      <Filter>Code\Work</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Code\Work</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Code\Work</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Code\Work</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>Code\App</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX.h">
+      <Filter>Code\App</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Code">
+      <UniqueIdentifier>{334ada22-3c82-42fa-a94f-40e680d99c84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Work">
+      <UniqueIdentifier>{f914fa6d-9a8b-486d-b2af-db1f3c06912f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Work\Imgui">
+      <UniqueIdentifier>{d1b5bf23-f80e-41da-98c9-f04856acc6ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\App">
+      <UniqueIdentifier>{7a484145-d5c4-4122-b8e3-843a0917d12c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader">
+      <UniqueIdentifier>{f7237334-78d5-43ef-93cd-c928ef8adf27}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="PS_Sprite.hlsl">
+      <Filter>Code\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="VS_Object.hlsl">
+      <Filter>Code\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="VS_Sprite.hlsl">
+      <Filter>Code\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_TexColor.hlsl">
+      <Filter>Code\Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
