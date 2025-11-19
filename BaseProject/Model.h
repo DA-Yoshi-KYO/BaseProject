@@ -1,10 +1,10 @@
 /*
-* @date 2024.12.27 morphing’Ç‰Á
-* @date 2025.01.04 morphingƒAƒjƒ[ƒVƒ‡ƒ“‚İ‚Åb’è‚ÅŠ®¬
-* @date 2025.01.06 ƒtƒŠ[ƒY‚ÌƒGƒ‰[ƒƒbƒZ[ƒW•\¦
-* @date 2025.01.09 ƒŠƒtƒ@ƒNƒ^ƒŠƒ“ƒO
+* @date 2024.12.27 morphingè¿½åŠ 
+* @date 2025.01.04 morphingã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¾¼ã¿ã§æš«å®šã§å®Œæˆ
+* @date 2025.01.06 ãƒ•ãƒªãƒ¼ã‚ºã®ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸è¡¨ç¤º
+* @date 2025.01.09 ãƒªãƒ•ã‚¡ã‚¯ã‚¿ãƒªãƒ³ã‚°
 * @brief 
-* @ ‡¬ƒAƒjƒ[ƒVƒ‡ƒ“‚Æ‚Í(‚»‚Ì‚¤‚¿’Ç‹L
+* @ åˆæˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã¨ã¯(ãã®ã†ã¡è¿½è¨˜
 * 
 */
 #ifndef __MODEL_H__
@@ -17,7 +17,7 @@
 #include <functional>
 
 #ifdef _DEBUG
-#define MODEL_FORCE_ERROR (1) // ƒGƒ‰[ƒƒbƒZ[ƒW‹­§•\¦
+#define MODEL_FORCE_ERROR (1) // ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å¼·åˆ¶è¡¨ç¤º
 #else
 #define MODEL_FORCE_ERROR (0)
 #endif
@@ -25,488 +25,488 @@
 class Model
 {
 public:
-	// ƒ‚ƒfƒ‹”½“]İ’è
-	enum Flip
-	{
-		None,			// DirectX€‹’(”½“]‚·‚é
-		XFlip,			// Maya€‹’
-		ZFlip,			// DirectX€‹’(Maya‚©‚ç180‰ñ“]‚µ‚½ó‘Ô
-		ZFlipUseAnime,	// DirecX€‹’(ƒAƒjƒ[ƒVƒ‡ƒ“‚³‚¹‚éê‡@¦“®ìƒ`ƒFƒbƒN•s\•ª
-	};
+    // ãƒ¢ãƒ‡ãƒ«åè»¢è¨­å®š
+    enum Flip
+    {
+        None,			// DirectXæº–æ‹ (åè»¢ã™ã‚‹
+        XFlip,			// Mayaæº–æ‹ 
+        ZFlip,			// DirectXæº–æ‹ (Mayaã‹ã‚‰180å›è»¢ã—ãŸçŠ¶æ…‹
+        ZFlipUseAnime,	// DirecXæº–æ‹ (ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã•ã›ã‚‹å ´åˆã€€â€»å‹•ä½œãƒã‚§ãƒƒã‚¯ä¸ååˆ†
+    };
 
 private:
-	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶•û–@
-	enum AnimePattern
-	{
-		MAIN,			// ’ÊíÄ¶
-		BLEND,			// ƒuƒŒƒ“ƒhÄ¶
-		PARAMETRIC0,	// ‡¬A
-		PARAMETRIC1,	// ‡¬B
-		MAX_ANIMEPATTERN
-	};
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ–¹æ³•
+    enum AnimePattern
+    {
+        MAIN,			// é€šå¸¸å†ç”Ÿ
+        BLEND,			// ãƒ–ãƒ¬ãƒ³ãƒ‰å†ç”Ÿ
+        PARAMETRIC0,	// åˆæˆA
+        PARAMETRIC1,	// åˆæˆB
+        MAX_ANIMEPATTERN
+    };
 
 public:
-	// Œ^’è‹`
-	using NodeIndex	= int;	// ƒ{[ƒ“(ŠK‘w)”Ô†
-	using MorphNo	= int;	// ƒ‚[ƒtƒf[ƒ^”Ô†
-	using AnimeNo	= int;	// ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
+    // å‹å®šç¾©
+    using NodeIndex	= int;	// ãƒœãƒ¼ãƒ³(éšå±¤)ç•ªå·
+    using MorphNo	= int;	// ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿ç•ªå·
+    using AnimeNo	= int;	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
 
-	// ’è”’è‹`
-	static const NodeIndex	NODE_NONE			= -1;	// ŠY“–ƒm[ƒh‚È‚µ
-	static const MorphNo	MORPH_NONE			= -1;	// ŠY“–ƒ‚[ƒt‚È‚µ
-	static const AnimeNo	ANIME_NONE			= -1;	// ŠY“–ƒAƒjƒ[ƒVƒ‡ƒ“‚È‚µ
-	static const AnimeNo	PARAMETRIC_ANIME	= -2;	// ‡¬ƒAƒjƒ[ƒVƒ‡ƒ“
+    // å®šæ•°å®šç¾©
+    static const NodeIndex	NODE_NONE			= -1;	// è©²å½“ãƒãƒ¼ãƒ‰ãªã—
+    static const MorphNo	MORPH_NONE			= -1;	// è©²å½“ãƒ¢ãƒ¼ãƒ•ãªã—
+    static const AnimeNo	ANIME_NONE			= -1;	// è©²å½“ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãªã—
+    static const AnimeNo	PARAMETRIC_ANIME	= -2;	// åˆæˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 
 private:
-	// “à•”Œ^’è‹`
-	using AnimeTime = float;
-	using Children	= std::vector<NodeIndex>;	// ƒm[ƒhŠK‘wî•ñ
+    // å†…éƒ¨å‹å®šç¾©
+    using AnimeTime = float;
+    using Children	= std::vector<NodeIndex>;	// ãƒãƒ¼ãƒ‰éšå±¤æƒ…å ±
 
-	// “à•”’è”’è‹`
-	static const UINT	MAX_BONE	= 200;	// ‚PƒƒbƒVƒ…‚ÌÅ‘åƒ{[ƒ“”(‚±‚±‚ğ•ÏX‚·‚éê‡.hlsl‘¤‚Ì’è‹`‚à•ÏX‚·‚é
-	static const UINT	MAX_WEIGHT	= 4;	// ‚P’¸“_‚ÉŠ„‚è“–‚Ä‚ç‚ê‚éÅ‘åƒ{[ƒ“”
+    // å†…éƒ¨å®šæ•°å®šç¾©
+    static const UINT	MAX_BONE	= 200;	// ï¼‘ãƒ¡ãƒƒã‚·ãƒ¥ã®æœ€å¤§ãƒœãƒ¼ãƒ³æ•°(ã“ã“ã‚’å¤‰æ›´ã™ã‚‹å ´åˆ.hlslå´ã®å®šç¾©ã‚‚å¤‰æ›´ã™ã‚‹
+    static const UINT	MAX_WEIGHT	= 4;	// ï¼‘é ‚ç‚¹ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚Œã‚‹æœ€å¤§ãƒœãƒ¼ãƒ³æ•°
 
-	// ŠK‘wî•ñ
-	struct Node
-	{
-		std::string			name;		// ŠK‘w–¼
-		NodeIndex			parent;		// eƒ{[ƒ“
-		Children			children;	// qƒ{[ƒ“
-		DirectX::XMMATRIX	mat;		// ƒAƒjƒ[ƒVƒ‡ƒ“—p•ÏŠ·s—ñ
-	};
-	using Nodes = std::vector<Node>;
+    // éšå±¤æƒ…å ±
+    struct Node
+    {
+        std::string			name;		// éšå±¤å
+        NodeIndex			parent;		// è¦ªãƒœãƒ¼ãƒ³
+        Children			children;	// å­ãƒœãƒ¼ãƒ³
+        DirectX::XMMATRIX	mat;		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨å¤‰æ›è¡Œåˆ—
+    };
+    using Nodes = std::vector<Node>;
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶î•ñ
-	struct AnimePlayInfo
-	{
-		AnimeTime		nowTime;	// Œ»İ‚ÌÄ¶ŠÔ
-		AnimeTime		totalTime;	// Å‘åÄ¶ŠÔ
-		float			speed;		// Ä¶‘¬“x
-		bool			isLoop;		// ƒ‹[ƒvw’è
-	};
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæƒ…å ±
+    struct AnimePlayInfo
+    {
+        AnimeTime		nowTime;	// ç¾åœ¨ã®å†ç”Ÿæ™‚é–“
+        AnimeTime		totalTime;	// æœ€å¤§å†ç”Ÿæ™‚é–“
+        float			speed;		// å†ç”Ÿé€Ÿåº¦
+        bool			isLoop;		// ãƒ«ãƒ¼ãƒ—æŒ‡å®š
+    };
 
-	//===== ƒAƒjƒ[ƒVƒ‡ƒ“ =====
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì•ÏŠ·î•ñ
-	struct AnimeTransform
-	{
-		DirectX::XMFLOAT3	translate;
-		DirectX::XMFLOAT4	quaternion;
-		DirectX::XMFLOAT3	scale;
-	};
-	using AnimeKey			= std::pair<AnimeTime, AnimeTransform>;
-	using AnimeTimeline		= std::map<AnimeTime, AnimeTransform>;
-	using AnimeTransforms	= std::vector<AnimeTransform>;
+    //===== ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ =====
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å¤‰æ›æƒ…å ±
+    struct AnimeTransform
+    {
+        DirectX::XMFLOAT3	translate;
+        DirectX::XMFLOAT4	quaternion;
+        DirectX::XMFLOAT3	scale;
+    };
+    using AnimeKey			= std::pair<AnimeTime, AnimeTransform>;
+    using AnimeTimeline		= std::map<AnimeTime, AnimeTransform>;
+    using AnimeTransforms	= std::vector<AnimeTransform>;
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Æƒm[ƒh‚ÌŠÖ˜A•t‚¯î•ñ
-	struct AnimeChannel
-	{
-		NodeIndex		node;		// ‘Î‰‚·‚éƒm[ƒh
-		AnimeTimeline	timeline;	// ƒm[ƒh‚É•t‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“î•ñ
-	};
-	using AnimeChannels = std::vector<AnimeChannel>;
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã¨ãƒãƒ¼ãƒ‰ã®é–¢é€£ä»˜ã‘æƒ…å ±
+    struct AnimeChannel
+    {
+        NodeIndex		node;		// å¯¾å¿œã™ã‚‹ãƒãƒ¼ãƒ‰
+        AnimeTimeline	timeline;	// ãƒãƒ¼ãƒ‰ã«ä»˜éšã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
+    };
+    using AnimeChannels = std::vector<AnimeChannel>;
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“î•ñ
-	struct Animation
-	{
-		AnimePlayInfo	info;		// Ä¶î•ñ
-		AnimeChannels	channels;	// •ÏŠ·î•ñ
-	};
-	using Animations = std::vector<Animation>;
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
+    struct Animation
+    {
+        AnimePlayInfo	info;		// å†ç”Ÿæƒ…å ±
+        AnimeChannels	channels;	// å¤‰æ›æƒ…å ±
+    };
+    using Animations = std::vector<Animation>;
 
-	//===== ƒuƒŒƒ“ƒhƒVƒFƒCƒv =====
-	// ƒ‚[ƒtƒBƒ“ƒO—p’¸“_
-	struct MorphVertex
-	{
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT3 normal;
-		DirectX::XMFLOAT2 uv;
-	};
-	using MorphVertices = std::vector<MorphVertex>;
+    //===== ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚·ã‚§ã‚¤ãƒ— =====
+    // ãƒ¢ãƒ¼ãƒ•ã‚£ãƒ³ã‚°ç”¨é ‚ç‚¹
+    struct MorphVertex
+    {
+        DirectX::XMFLOAT3 pos;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT2 uv;
+    };
+    using MorphVertices = std::vector<MorphVertex>;
 
-	// ƒ‚[ƒtƒBƒ“ƒO—pƒƒbƒVƒ…
-	struct MorphMesh
-	{
-		std::string		name;		// ƒ‚[ƒtƒf[ƒ^–¼
-		int				meshNo;		// ‘Î‰‚·‚éƒƒbƒVƒ…
-		float			weight;		// ƒuƒŒƒ“ƒhŠ„‡
-		MorphVertices	vertices;	// •ÏŒ`’¸“_î•ñ
-	};
-	using MorphMeshes = std::vector<MorphMesh>;
+    // ãƒ¢ãƒ¼ãƒ•ã‚£ãƒ³ã‚°ç”¨ãƒ¡ãƒƒã‚·ãƒ¥
+    struct MorphMesh
+    {
+        std::string		name;		// ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿å
+        int				meshNo;		// å¯¾å¿œã™ã‚‹ãƒ¡ãƒƒã‚·ãƒ¥
+        float			weight;		// ãƒ–ãƒ¬ãƒ³ãƒ‰å‰²åˆ
+        MorphVertices	vertices;	// å¤‰å½¢é ‚ç‚¹æƒ…å ±
+    };
+    using MorphMeshes = std::vector<MorphMesh>;
 
-	// ƒ‚[ƒtƒBƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“’†‚ÌƒuƒŒƒ“ƒhî•ñ
-	using MorphAnimeWeights = std::vector<float>;	// ƒAƒjƒ[ƒVƒ‡ƒ“’†‚ÌƒuƒŒƒ“ƒhŠ„‡
-	struct MorphTimeline
-	{
-		AnimeTime			time;		// ƒAƒjƒ[ƒVƒ‡ƒ“ÀsŠÔ
-		MorphAnimeWeights	weights;	// ƒ‚[ƒtƒ^[ƒQƒbƒg‚²‚Æ‚ÌƒuƒŒƒ“ƒhŠ„‡
-	};
-	using MorphTimelines	= std::vector<MorphTimeline>;
+    // ãƒ¢ãƒ¼ãƒ•ã‚£ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ä¸­ã®ãƒ–ãƒ¬ãƒ³ãƒ‰æƒ…å ±
+    using MorphAnimeWeights = std::vector<float>;	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ä¸­ã®ãƒ–ãƒ¬ãƒ³ãƒ‰å‰²åˆ
+    struct MorphTimeline
+    {
+        AnimeTime			time;		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å®Ÿè¡Œæ™‚é–“
+        MorphAnimeWeights	weights;	// ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã”ã¨ã®ãƒ–ãƒ¬ãƒ³ãƒ‰å‰²åˆ
+    };
+    using MorphTimelines	= std::vector<MorphTimeline>;
 
-	// ƒ‚[ƒtƒBƒ“ƒO‚ÌƒAƒjƒ[ƒVƒ‡ƒ“î•ñ
-	using MorphAnimeTargets = std::vector<unsigned int>;
-	struct MorphAnimation
-	{
-		AnimePlayInfo		info;		// Ä¶î•ñ
-		MorphAnimeTargets	morphs;		// Ä¶’†‚É•ÏX‚·‚éƒ‚[ƒtƒ^[ƒQƒbƒg
-		MorphTimelines		timelines;	// ƒAƒjƒ[ƒVƒ‡ƒ“î•ñ
-	};
-	using MorphAnimations = std::vector<MorphAnimation>;
+    // ãƒ¢ãƒ¼ãƒ•ã‚£ãƒ³ã‚°ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
+    using MorphAnimeTargets = std::vector<unsigned int>;
+    struct MorphAnimation
+    {
+        AnimePlayInfo		info;		// å†ç”Ÿæƒ…å ±
+        MorphAnimeTargets	morphs;		// å†ç”Ÿä¸­ã«å¤‰æ›´ã™ã‚‹ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ
+        MorphTimelines		timelines;	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
+    };
+    using MorphAnimations = std::vector<MorphAnimation>;
 
 public:
-	// ’¸“_î•ñ
-	struct Vertex
-	{
-		DirectX::XMFLOAT3	pos;
-		DirectX::XMFLOAT3	normal;
-		DirectX::XMFLOAT2	uv;
-		DirectX::XMFLOAT4	color;
-		float				weight[MAX_WEIGHT];
-		unsigned int		index[MAX_WEIGHT];
-	};
-	using Vertices	= std::vector<Vertex>;
-	using Indices	= std::vector<unsigned long>;
+    // é ‚ç‚¹æƒ…å ±
+    struct Vertex
+    {
+        DirectX::XMFLOAT3	pos;
+        DirectX::XMFLOAT3	normal;
+        DirectX::XMFLOAT2	uv;
+        DirectX::XMFLOAT4	color;
+        float				weight[MAX_WEIGHT];
+        unsigned int		index[MAX_WEIGHT];
+    };
+    using Vertices	= std::vector<Vertex>;
+    using Indices	= std::vector<unsigned long>;
 
-	// ƒ{[ƒ“î•ñ
-	struct Bone
-	{
-		NodeIndex			nodeIndex;	// •ÏŒ`î•ñ‚ÍŠK‘wî•ñ‚ÉŠi”[
-		DirectX::XMMATRIX	invOffset;	// ‹ts—ñ
-	};
-	using Bones = std::vector<Bone>;
+    // ãƒœãƒ¼ãƒ³æƒ…å ±
+    struct Bone
+    {
+        NodeIndex			nodeIndex;	// å¤‰å½¢æƒ…å ±ã¯éšå±¤æƒ…å ±ã«æ ¼ç´
+        DirectX::XMMATRIX	invOffset;	// é€†è¡Œåˆ—
+    };
+    using Bones = std::vector<Bone>;
 
-	// ƒƒbƒVƒ…
-	struct Mesh
-	{
-		NodeIndex		nodeIndex;	// ŠK‘w‚Æ‚Ì•R‚Ã‚¯
-		Vertices		vertices;	// ’¸“_î•ñ
-		Indices			indices;	// ƒCƒ“ƒfƒbƒNƒXî•ñ
-		unsigned int	materialID;	// g—p‚·‚éƒ}ƒeƒŠƒAƒ‹
-		Bones			bones;		// ƒƒbƒVƒ…‚É•R‚Ã‚¯‚ç‚Ä‚¢‚éƒ{[ƒ“
-		MeshBuffer*		pMesh;		// •`‰æƒf[ƒ^
-	};
-	using Meshes = std::vector<Mesh>;
+    // ãƒ¡ãƒƒã‚·ãƒ¥
+    struct Mesh
+    {
+        NodeIndex		nodeIndex;	// éšå±¤ã¨ã®ç´ã¥ã‘
+        Vertices		vertices;	// é ‚ç‚¹æƒ…å ±
+        Indices			indices;	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±
+        unsigned int	materialID;	// ä½¿ç”¨ã™ã‚‹ãƒãƒ†ãƒªã‚¢ãƒ«
+        Bones			bones;		// ãƒ¡ãƒƒã‚·ãƒ¥ã«ç´ã¥ã‘ã‚‰ã¦ã„ã‚‹ãƒœãƒ¼ãƒ³
+        MeshBuffer*		pMesh;		// æç”»ãƒ‡ãƒ¼ã‚¿
+    };
+    using Meshes = std::vector<Mesh>;
 
-	// ƒ}ƒeƒŠƒAƒ‹î•ñ
-	struct Material
-	{
-		DirectX::XMFLOAT4	diffuse;	// ŠgUŒõ(ƒƒCƒ“ƒJƒ‰[
-		DirectX::XMFLOAT4	ambient;	// ŠÂ‹«Œõ(‰A‚Ì•”•ª‚ÌƒJƒ‰[
-		DirectX::XMFLOAT4	specular;	// ‹¾–Ê”½ËŒõ(‹­‚­Œõ‚é•”•ª‚ÌƒJƒ‰[
-		Texture*			pTexture;	// ƒeƒNƒXƒ`ƒƒ
-	};
-	using Materials = std::vector<Material>;
+    // ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±
+    struct Material
+    {
+        DirectX::XMFLOAT4	diffuse;	// æ‹¡æ•£å…‰(ãƒ¡ã‚¤ãƒ³ã‚«ãƒ©ãƒ¼
+        DirectX::XMFLOAT4	ambient;	// ç’°å¢ƒå…‰(é™°ã®éƒ¨åˆ†ã®ã‚«ãƒ©ãƒ¼
+        DirectX::XMFLOAT4	specular;	// é¡é¢åå°„å…‰(å¼·ãå…‰ã‚‹éƒ¨åˆ†ã®ã‚«ãƒ©ãƒ¼
+        Texture*			pTexture;	// ãƒ†ã‚¯ã‚¹ãƒãƒ£
+    };
+    using Materials = std::vector<Material>;
 
 
 public:
-	Model();
-	~Model();
+    Model();
+    ~Model();
 
-	//========================================
-	//     Šî–{ˆ—
-	//========================================
-	/*
-	* @brief ƒŠƒZƒbƒg
-	*/
-	void Reset();
+    //========================================
+    //     åŸºæœ¬å‡¦ç†
+    //========================================
+    /*
+    * @brief ãƒªã‚»ãƒƒãƒˆ
+    */
+    void Reset();
 
-	/*
-	* @brief ’¸“_ƒVƒF[ƒ_[‚Ìİ’è
-	* @param[in] vs ’¸“_ƒVƒF[ƒ_[
-	*/
-	void SetVertexShader(Shader* vs);
+    /*
+    * @brief é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®è¨­å®š
+    * @param[in] vs é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
+    */
+    void SetVertexShader(Shader* vs);
 
-	/*
-	* @brief ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚Ìİ’è
-	* @param[in] ps ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
-	*/
-	void SetPixelShader(Shader* ps);
+    /*
+    * @brief ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®è¨­å®š
+    * @param[in] ps ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
+    */
+    void SetPixelShader(Shader* ps);
 
-	/*
-	* @brief ƒ‚ƒfƒ‹ƒf[ƒ^‚Ì“Ç‚İ‚İ
-	* @param[in] file “Ç‚İ‚İæƒpƒX
-	* @param[in] scale Šg‘å—¦
-	* @param[in] flip ”½“]İ’è
-	* @return “Ç‚İ‚İŒ‹‰Ê
-	*/
-	bool Load(const char* file, float scale = 1.0f, Flip flip = Flip::None);
+    /*
+    * @brief ãƒ¢ãƒ‡ãƒ«ãƒ‡ãƒ¼ã‚¿ã®èª­ã¿è¾¼ã¿
+    * @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+    * @param[in] scale æ‹¡å¤§ç‡
+    * @param[in] flip åè»¢è¨­å®š
+    * @return èª­ã¿è¾¼ã¿çµæœ
+    */
+    bool Load(const char* file, float scale = 1.0f, Flip flip = Flip::None);
 
-	/*
-	* @brief XVˆ—
-	* @param[in] tick Œo‰ßŠÔ(•b)
-	*/
-	void Step(float tick);
+    /*
+    * @brief æ›´æ–°å‡¦ç†
+    * @param[in] tick çµŒéæ™‚é–“(ç§’)
+    */
+    void Step(float tick);
 
-	/*
-	* @brief •`‰æˆ—
-	* @param[in] meshNo •`‰æƒƒbƒVƒ…”Ô†(-1‚Å‚·‚×‚Ä•\¦
-	*/
-	void Draw(int meshNo = -1);
-
-
-	//========================================
-	//     ƒ`ƒFƒbƒNˆ—
-	//========================================
-	/*
-	* @brief “Ç‚İ‚İˆ—ÀsŒã‚ÌƒGƒ‰[ƒƒbƒZ[ƒWæ“¾
-	* @return ƒGƒ‰[ƒƒbƒZ[ƒW
-	*/
-	static std::string GetError();
-
-	/*
-	* @brief ƒ{[ƒ“‚ÌƒfƒoƒbƒO•\¦
-	* @param[in] world ƒ[ƒ‹ƒhs—ñ
-	*/
-	void DrawBone(DirectX::XMMATRIX world = DirectX::XMMatrixIdentity());
-
-	//========================================
-	//     ƒAƒjƒ[ƒVƒ‡ƒ“
-	//========================================
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚Ì’Ç‰Á“Ç‚İ‚İ
-	* @param[in] file “Ç‚İ‚İæƒpƒX
-	* @return ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	*/
-	AnimeNo AddAnimation(const char* file);
-
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶
-	* @param[in] no Ä¶‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	* @param[in] loop ƒ‹[ƒvÄ¶ƒtƒ‰ƒO
-	* @param[in] speed Ä¶‘¬“x
-	*/
-	void PlayAnime(AnimeNo no, bool loop, float speed = 1.0f);
-
-	/*
-	* @brief ƒuƒŒƒ“ƒhÄ¶
-	* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	* @param[in] blendTime ƒuƒŒƒ“ƒh‚ÉŠ|‚¯‚éŠÔ
-	* @param[in] loop ƒ‹[ƒvƒtƒ‰ƒO
-	* @param[in] speed Ä¶‘¬“x
-	*/
-	void PlayBlend(AnimeNo no, AnimeTime blendTime, bool loop, float speed = 1.0f);
-
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‡¬Ä¶
-	* @param[in] no1 ‡¬Œ³‚P
-	* @param[in] no2 ‡¬Œ³‚Q
-	*/
-	void SetParametric(AnimeNo no1, AnimeNo no2);
-
-	/*
-	* @brief ‡¬Š„‡‚ğw’è
-	* @param[in] blendRate 0`1‚ÌŠÔ‚Åno1‚Æno2‚ÌƒAƒjƒ‚ğ‡¬(0‚Åno1,1‚Åno2)
-	*/
-	void SetParametricBlend(float blendRate);
-
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌŒ»İ‚ÌÄ¶ŠÔ‚ğ•ÏX
-	* @param[in] no •ÏX‘ÎÛ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	* @param[in] time •ÏXŒã‚ÌŠÔ
-	*/
-	void SetAnimeTime(AnimeNo no, AnimeTime time);
+    /*
+    * @brief æç”»å‡¦ç†
+    * @param[in] meshNo æç”»ãƒ¡ãƒƒã‚·ãƒ¥ç•ªå·(-1ã§ã™ã¹ã¦è¡¨ç¤º
+    */
+    void Draw(int meshNo = -1);
 
 
+    //========================================
+    //     ãƒã‚§ãƒƒã‚¯å‡¦ç†
+    //========================================
+    /*
+    * @brief èª­ã¿è¾¼ã¿å‡¦ç†å®Ÿè¡Œå¾Œã®ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å–å¾—
+    * @return ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
+    */
+    static std::string GetError();
 
-	//========================================
-	//     ƒuƒŒƒ“ƒhƒVƒFƒCƒv
-	//========================================
-	/*
-	* @brief ƒ‚[ƒtƒf[ƒ^‚Ì’Ç‰Á
-	* @param[in] file “Ç‚İ‚İæƒpƒX
-	* @param[out] out “Ç‚İæ‚Á‚½ƒf[ƒ^‚ÉŠ„‚è“–‚Ä‚ç‚ê‚½ƒCƒ“ƒfƒbƒNƒX(•¡”“Ç‚İ‚Ş‰Â”\«‚ª‚ ‚é‚½‚ß
-	* @return “Ç‚İæ‚èŒ‹‰Ê
-	*/
-	bool AddMorph(const char* file, Indices* out = nullptr);
+    /*
+    * @brief ãƒœãƒ¼ãƒ³ã®ãƒ‡ãƒãƒƒã‚°è¡¨ç¤º
+    * @param[in] world ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—
+    */
+    void DrawBone(DirectX::XMMATRIX world = DirectX::XMMatrixIdentity());
 
-	/*
-	* @brief ƒ‚[ƒt‚Ì‡¬Š„‡‚ğw’è
-	* @param[in] no Š„‡‚ğ•ÏX‚·‚éƒ‚[ƒt
-	* @param[in] weight ‡¬Š„‡
-	*/
-	void SetMorphWeight(MorphNo no, float weight);
+    //========================================
+    //     ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+    //========================================
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã®è¿½åŠ èª­ã¿è¾¼ã¿
+    * @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+    * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    */
+    AnimeNo AddAnimation(const char* file);
 
-	/*
-	* @brief ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰Á“Ç‚İ‚İ
-	* @param[in] file “Ç‚İ‚İæƒpƒX
-	* @return ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	*/
-	AnimeNo AddMorphAnime(const char* file);
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿ
+    * @param[in] no å†ç”Ÿã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    * @param[in] loop ãƒ«ãƒ¼ãƒ—å†ç”Ÿãƒ•ãƒ©ã‚°
+    * @param[in] speed å†ç”Ÿé€Ÿåº¦
+    */
+    void PlayAnime(AnimeNo no, bool loop, float speed = 1.0f);
 
-	/*
-	* @brief ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶
-	* @param[in] no Ä¶‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“
-	* @param[in] loop ƒ‹[ƒvÄ¶ƒtƒ‰ƒO
-	* @param[in] speed Ä¶‘¬“x
-	*/
-	void PlayMorph(AnimeNo no, bool loop, float speed = 1.0f);
+    /*
+    * @brief ãƒ–ãƒ¬ãƒ³ãƒ‰å†ç”Ÿ
+    * @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    * @param[in] blendTime ãƒ–ãƒ¬ãƒ³ãƒ‰ã«æ›ã‘ã‚‹æ™‚é–“
+    * @param[in] loop ãƒ«ãƒ¼ãƒ—ãƒ•ãƒ©ã‚°
+    * @param[in] speed å†ç”Ÿé€Ÿåº¦
+    */
+    void PlayBlend(AnimeNo no, AnimeTime blendTime, bool loop, float speed = 1.0f);
 
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®åˆæˆå†ç”Ÿ
+    * @param[in] no1 åˆæˆå…ƒï¼‘
+    * @param[in] no2 åˆæˆå…ƒï¼’
+    */
+    void SetParametric(AnimeNo no1, AnimeNo no2);
 
-	//========================================
-	//     î•ñæ“¾
-	//========================================
-	/*
-	* @brief ƒƒbƒVƒ…”‚ğæ“¾
-	* @return ƒƒbƒVƒ…”
-	*/
-	unsigned int GetMeshNum();
+    /*
+    * @brief åˆæˆå‰²åˆã‚’æŒ‡å®š
+    * @param[in] blendRate 0ï½1ã®é–“ã§no1ã¨no2ã®ã‚¢ãƒ‹ãƒ¡ã‚’åˆæˆ(0ã§no1,1ã§no2)
+    */
+    void SetParametricBlend(float blendRate);
 
-	/*
-	* @brief ƒƒbƒVƒ…î•ñ‚ğæ“¾
-	* @param[in] index æ“¾‚·‚éƒƒbƒVƒ…”Ô†
-	* @return ƒƒbƒVƒ…î•ñ
-	*/
-	const Mesh* GetMesh(unsigned int index);
-
-	/*
-	* @brief ƒ}ƒeƒŠƒAƒ‹”‚ğæ“¾
-	* @return ƒ}ƒeƒŠƒAƒ‹”
-	*/
-	unsigned int GetMaterialNum();
-
-	/*
-	* @brief ƒ}ƒeƒŠƒAƒ‹î•ñ‚ğæ“¾
-	* @param[in] index æ“¾‚·‚éƒ}ƒeƒŠƒAƒ‹”Ô†
-	* @return ƒ}ƒeƒŠƒAƒ‹î•ñ
-	*/
-	const Material* GetMaterial(unsigned int index);
-
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“Œã‚Ì•ÏŠ·s—ñæ“¾
-	* @param[in] index ƒ{[ƒ“”Ô†
-	* @return ŠY“–ƒ{[ƒ“‚Ì•ÏŠ·s—ñ
-	*/
-	DirectX::XMMATRIX GetBoneMatrix(NodeIndex index);
-	
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶”»’è
-	* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	* @return Ä¶ó‹µ
-	*/
-	bool IsAnimePlay(AnimeNo no);
-
-	/*
-	* @brief Ä¶’†‚ÌƒAƒjƒ”Ô†æ“¾
-	* @return ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	*/
-	AnimeNo GetAnimePlayNo();
-
-	/*
-	* @brief Ä¶’†‚ÌƒuƒŒƒ“ƒh”Ô†æ“¾
-	* @return ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-	*/
-	AnimeNo GetAnimeBlendNo();
-
-	/*
-	* @brief ƒAƒjƒ[ƒVƒ‡ƒ“î•ñæ“¾
-	* @return ƒAƒjƒ[ƒVƒ‡ƒ“î•ñ
-	*/
-	const AnimePlayInfo* GetPlayAnimeInfo();
-
-private:
-	//========================================
-	//     Šî–{ˆ—
-	//========================================
-	// assimp‚Åƒf[ƒ^‚ğ“Ç‚İ‚İ
-	const void* LoadAssimpScene(const char* file);
-	// ŠK‘wî•ñ‚Ì\’z
-	void MakeNodes(const void* ptr);
-	// ƒƒbƒVƒ…‚Ìì¬
-	void MakeMesh(const void* ptr);
-	// ƒ}ƒeƒŠƒAƒ‹‚Ìì¬
-	void MakeMaterial(const void* ptr, std::string directory);
-	// ’¸“_ƒuƒŒƒ“ƒh‚Ìì¬
-	void MakeVertexWeight(const void* ptr, int meshIndex);
-	// ƒ{[ƒ“‚ ‚è‚Ì’¸“_ƒuƒŒƒ“ƒhì¬
-	void MakeVertexWeightHasBone(const void* ptr, Mesh& mesh);
-	// eqŠÖŒW‚ğ‚à‚Æ‚É’¸“_ƒuƒŒƒ“ƒhì¬
-	void MakeVertexWeightFromNode(const void* scene, const void* ptr, Mesh& mesh);
-
-	//========================================
-	//     ƒ`ƒFƒbƒNˆ—
-	//========================================
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìƒ‹[ƒvƒ`ƒFƒbƒN
-	void CheckAnimePlayLoop(AnimePlayInfo& info);
-	// ƒGƒ‰[ƒ`ƒFƒbƒN
-	bool IsError(bool condition, std::string message);
-	// ƒGƒ‰[ƒƒbƒZ[ƒW‚Ìİ’è
-	void SetErrorMessage(std::string message);
-	// ƒGƒ‰[ƒƒbƒZ[ƒW‚Ì•\¦
-	void ShowErrorMessage(const char* caption, bool isWarning);
-	// ƒm[ƒh’Tõ
-	NodeIndex FindNode(const char* name);
-	// ƒtƒŠ[ƒYÏ‚İƒƒbƒVƒ…‚Ìƒ`ƒFƒbƒN
-	bool CheckMeshFreeze(const void* ptr);
-	// ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†‚Ìƒ`ƒFƒbƒN
-	bool CheckAnimeNo(AnimeNo no);
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ç¾åœ¨ã®å†ç”Ÿæ™‚é–“ã‚’å¤‰æ›´
+    * @param[in] no å¤‰æ›´å¯¾è±¡ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    * @param[in] time å¤‰æ›´å¾Œã®æ™‚é–“
+    */
+    void SetAnimeTime(AnimeNo no, AnimeTime time);
 
 
-	//========================================
-	//     ƒAƒjƒ[ƒVƒ‡ƒ“
-	//========================================
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV
-	void StepAnime(float tick);
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‰Šú‰»
-	void InitAnime(AnimeNo no);
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶î•ñ‚ÌXV
-	void UpdateAnime(AnimeNo no, float tick);
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìp¨s—ñ‚ğŒvZ
-	void CalcAnime(AnimePattern kind, AnimeNo no);
-	// Ä¶•û–@•Ê‚Ìs—ñŒ‹‰Ê‚Ì‡¬
-	void CalcBones(NodeIndex index, const DirectX::XMMATRIX parent);
-	// s—ñŒ‹‰Ê“¯m‚Ì•âŠÔ
-	void LerpTransform(AnimeTransform* pOut, const AnimeTransform& a, const AnimeTransform& b, float rate);
 
-	//========================================
-	//     ƒuƒŒƒ“ƒhƒVƒFƒCƒv
-	//========================================
-	// ƒ‚[ƒt‚ÌƒƒbƒVƒ…ƒf[ƒ^ì¬
-	void MakeMorphMesh(const void* ptr, int meshIndex, Indices* out);
-	// ƒ‚[ƒt‚ÌƒƒbƒVƒ…‚ÉŠ„‚è“–‚Ä‚ç‚ê‚é’¸“_ƒf[ƒ^‚Ìì¬
-	void MakeMorphVertices(MorphVertices& out, const void* ptr);
-	// ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“ì¬
-	void MakeMorphTimeline(MorphAnimation& anime, const void* ptr);
-	// ƒ‚[ƒt‚ÌXV
-	void UpdateMorph();
-	// ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV
-	void StepMorph(float tick);
-	// ƒ‚[ƒt‡¬‚Ì’¸“_ŒvZ
-	void AddMorphVtxWeight(Vertex* out, MorphVertex in, float weight);
+    //========================================
+    //     ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚·ã‚§ã‚¤ãƒ—
+    //========================================
+    /*
+    * @brief ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿ã®è¿½åŠ 
+    * @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+    * @param[out] out èª­ã¿å–ã£ãŸãƒ‡ãƒ¼ã‚¿ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚ŒãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹(è¤‡æ•°èª­ã¿è¾¼ã‚€å¯èƒ½æ€§ãŒã‚ã‚‹ãŸã‚
+    * @return èª­ã¿å–ã‚Šçµæœ
+    */
+    bool AddMorph(const char* file, Indices* out = nullptr);
 
-	//========================================
-	//     î•ñæ“¾
-	//========================================
-	// ƒfƒBƒŒƒNƒgƒŠ‚Ìæ“¾
-	std::string GetDirectory(const char* file);
+    /*
+    * @brief ãƒ¢ãƒ¼ãƒ•ã®åˆæˆå‰²åˆã‚’æŒ‡å®š
+    * @param[in] no å‰²åˆã‚’å¤‰æ›´ã™ã‚‹ãƒ¢ãƒ¼ãƒ•
+    * @param[in] weight åˆæˆå‰²åˆ
+    */
+    void SetMorphWeight(MorphNo no, float weight);
+
+    /*
+    * @brief ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®è¿½åŠ èª­ã¿è¾¼ã¿
+    * @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+    * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    */
+    AnimeNo AddMorphAnime(const char* file);
+
+    /*
+    * @brief ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿ
+    * @param[in] no å†ç”Ÿã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+    * @param[in] loop ãƒ«ãƒ¼ãƒ—å†ç”Ÿãƒ•ãƒ©ã‚°
+    * @param[in] speed å†ç”Ÿé€Ÿåº¦
+    */
+    void PlayMorph(AnimeNo no, bool loop, float speed = 1.0f);
+
+
+    //========================================
+    //     æƒ…å ±å–å¾—
+    //========================================
+    /*
+    * @brief ãƒ¡ãƒƒã‚·ãƒ¥æ•°ã‚’å–å¾—
+    * @return ãƒ¡ãƒƒã‚·ãƒ¥æ•°
+    */
+    unsigned int GetMeshNum();
+
+    /*
+    * @brief ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±ã‚’å–å¾—
+    * @param[in] index å–å¾—ã™ã‚‹ãƒ¡ãƒƒã‚·ãƒ¥ç•ªå·
+    * @return ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±
+    */
+    const Mesh* GetMesh(unsigned int index);
+
+    /*
+    * @brief ãƒãƒ†ãƒªã‚¢ãƒ«æ•°ã‚’å–å¾—
+    * @return ãƒãƒ†ãƒªã‚¢ãƒ«æ•°
+    */
+    unsigned int GetMaterialNum();
+
+    /*
+    * @brief ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±ã‚’å–å¾—
+    * @param[in] index å–å¾—ã™ã‚‹ãƒãƒ†ãƒªã‚¢ãƒ«ç•ªå·
+    * @return ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±
+    */
+    const Material* GetMaterial(unsigned int index);
+
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¾Œã®å¤‰æ›è¡Œåˆ—å–å¾—
+    * @param[in] index ãƒœãƒ¼ãƒ³ç•ªå·
+    * @return è©²å½“ãƒœãƒ¼ãƒ³ã®å¤‰æ›è¡Œåˆ—
+    */
+    DirectX::XMMATRIX GetBoneMatrix(NodeIndex index);
+    
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿåˆ¤å®š
+    * @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    * @return å†ç”ŸçŠ¶æ³
+    */
+    bool IsAnimePlay(AnimeNo no);
+
+    /*
+    * @brief å†ç”Ÿä¸­ã®ã‚¢ãƒ‹ãƒ¡ç•ªå·å–å¾—
+    * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    */
+    AnimeNo GetAnimePlayNo();
+
+    /*
+    * @brief å†ç”Ÿä¸­ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ç•ªå·å–å¾—
+    * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+    */
+    AnimeNo GetAnimeBlendNo();
+
+    /*
+    * @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±å–å¾—
+    * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
+    */
+    const AnimePlayInfo* GetPlayAnimeInfo();
 
 private:
-	static VertexShader*	m_pDefVS;		// ƒfƒtƒHƒ‹ƒg’¸“_ƒVƒF[ƒ_[
-	static PixelShader*		m_pDefPS;		// ƒfƒtƒHƒ‹ƒgƒsƒNƒZƒ‹ƒVƒF[ƒ_[
-	static unsigned int		m_shaderRef;	// ƒVƒF[ƒ_[QÆ”
+    //========================================
+    //     åŸºæœ¬å‡¦ç†
+    //========================================
+    // assimpã§ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
+    const void* LoadAssimpScene(const char* file);
+    // éšå±¤æƒ…å ±ã®æ§‹ç¯‰
+    void MakeNodes(const void* ptr);
+    // ãƒ¡ãƒƒã‚·ãƒ¥ã®ä½œæˆ
+    void MakeMesh(const void* ptr);
+    // ãƒãƒ†ãƒªã‚¢ãƒ«ã®ä½œæˆ
+    void MakeMaterial(const void* ptr, std::string directory);
+    // é ‚ç‚¹ãƒ–ãƒ¬ãƒ³ãƒ‰ã®ä½œæˆ
+    void MakeVertexWeight(const void* ptr, int meshIndex);
+    // ãƒœãƒ¼ãƒ³ã‚ã‚Šã®é ‚ç‚¹ãƒ–ãƒ¬ãƒ³ãƒ‰ä½œæˆ
+    void MakeVertexWeightHasBone(const void* ptr, Mesh& mesh);
+    // è¦ªå­é–¢ä¿‚ã‚’ã‚‚ã¨ã«é ‚ç‚¹ãƒ–ãƒ¬ãƒ³ãƒ‰ä½œæˆ
+    void MakeVertexWeightFromNode(const void* scene, const void* ptr, Mesh& mesh);
+
+    //========================================
+    //     ãƒã‚§ãƒƒã‚¯å‡¦ç†
+    //========================================
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ãƒ«ãƒ¼ãƒ—ãƒã‚§ãƒƒã‚¯
+    void CheckAnimePlayLoop(AnimePlayInfo& info);
+    // ã‚¨ãƒ©ãƒ¼ãƒã‚§ãƒƒã‚¯
+    bool IsError(bool condition, std::string message);
+    // ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®è¨­å®š
+    void SetErrorMessage(std::string message);
+    // ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®è¡¨ç¤º
+    void ShowErrorMessage(const char* caption, bool isWarning);
+    // ãƒãƒ¼ãƒ‰æ¢ç´¢
+    NodeIndex FindNode(const char* name);
+    // ãƒ•ãƒªãƒ¼ã‚ºæ¸ˆã¿ãƒ¡ãƒƒã‚·ãƒ¥ã®ãƒã‚§ãƒƒã‚¯
+    bool CheckMeshFreeze(const void* ptr);
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·ã®ãƒã‚§ãƒƒã‚¯
+    bool CheckAnimeNo(AnimeNo no);
+
+
+    //========================================
+    //     ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+    //========================================
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ›´æ–°
+    void StepAnime(float tick);
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®åˆæœŸåŒ–
+    void InitAnime(AnimeNo no);
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿæƒ…å ±ã®æ›´æ–°
+    void UpdateAnime(AnimeNo no, float tick);
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å§¿å‹¢è¡Œåˆ—ã‚’è¨ˆç®—
+    void CalcAnime(AnimePattern kind, AnimeNo no);
+    // å†ç”Ÿæ–¹æ³•åˆ¥ã®è¡Œåˆ—çµæœã®åˆæˆ
+    void CalcBones(NodeIndex index, const DirectX::XMMATRIX parent);
+    // è¡Œåˆ—çµæœåŒå£«ã®è£œé–“
+    void LerpTransform(AnimeTransform* pOut, const AnimeTransform& a, const AnimeTransform& b, float rate);
+
+    //========================================
+    //     ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚·ã‚§ã‚¤ãƒ—
+    //========================================
+    // ãƒ¢ãƒ¼ãƒ•ã®ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿ä½œæˆ
+    void MakeMorphMesh(const void* ptr, int meshIndex, Indices* out);
+    // ãƒ¢ãƒ¼ãƒ•ã®ãƒ¡ãƒƒã‚·ãƒ¥ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚Œã‚‹é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
+    void MakeMorphVertices(MorphVertices& out, const void* ptr);
+    // ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ä½œæˆ
+    void MakeMorphTimeline(MorphAnimation& anime, const void* ptr);
+    // ãƒ¢ãƒ¼ãƒ•ã®æ›´æ–°
+    void UpdateMorph();
+    // ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ›´æ–°
+    void StepMorph(float tick);
+    // ãƒ¢ãƒ¼ãƒ•åˆæˆæ™‚ã®é ‚ç‚¹è¨ˆç®—
+    void AddMorphVtxWeight(Vertex* out, MorphVertex in, float weight);
+
+    //========================================
+    //     æƒ…å ±å–å¾—
+    //========================================
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®å–å¾—
+    std::string GetDirectory(const char* file);
+
+private:
+    static VertexShader*	m_pDefVS;		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆé ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
+    static PixelShader*		m_pDefPS;		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
+    static unsigned int		m_shaderRef;	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å‚ç…§æ•°
 #ifdef _DEBUG
-	static std::string m_errorStr;	
+    static std::string m_errorStr;	
 #endif
 
 private:
-	float			m_loadScale;	// “Ç‚İ‚İ‚ÌŠg‘å—¦
-	Flip			m_loadFlip;		// “Ç‚İ‚İ‚Ì”½“]İ’è
-	VertexShader*	m_pVS;			// İ’è’†‚Ì’¸“_ƒVƒF[ƒ_
-	PixelShader*	m_pPS;			// İ’è’†‚ÌƒsƒNƒZƒ‹ƒVƒF[ƒ_
-	Nodes			m_nodes;		// ŠK‘wî•ñ
-	Meshes			m_meshes;		// ƒƒbƒVƒ…”z—ñ
-	Materials		m_materials;	// ƒ}ƒeƒŠƒAƒ‹”z—ñ
-	
-	AnimeTransforms	m_animeTransform[MAX_ANIMEPATTERN];	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶•û–@•Ê•ÏŒ`î•ñ
-	Animations		m_animes;			// ƒAƒjƒ”z—ñ
-	AnimeNo			m_playNo;			// Œ»İÄ¶’†‚ÌƒAƒjƒ”Ô†
-	AnimeNo			m_blendNo;			// ƒuƒŒƒ“ƒhÄ¶‚ğs‚¤ƒAƒjƒ”Ô†
-	AnimeNo			m_parametric[2];	// ‡¬Ä¶‚ğs‚¤ƒAƒjƒ”Ô†
-	AnimeTime		m_blendTime;		// Œ»İ‚Ì‘JˆÚŒo‰ßŠÔ
-	AnimeTime		m_blendTotalTime;	// ƒAƒjƒ‘JˆÚ‚É‚©‚©‚é‡ŒvŠÔ
-	float			m_parametricBlend;	// ƒpƒ‰ƒƒgƒŠƒbƒN‚ÌÄ¶Š„‡
+    float			m_loadScale;	// èª­ã¿è¾¼ã¿æ™‚ã®æ‹¡å¤§ç‡
+    Flip			m_loadFlip;		// èª­ã¿è¾¼ã¿æ™‚ã®åè»¢è¨­å®š
+    VertexShader*	m_pVS;			// è¨­å®šä¸­ã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€
+    PixelShader*	m_pPS;			// è¨­å®šä¸­ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€
+    Nodes			m_nodes;		// éšå±¤æƒ…å ±
+    Meshes			m_meshes;		// ãƒ¡ãƒƒã‚·ãƒ¥é…åˆ—
+    Materials		m_materials;	// ãƒãƒ†ãƒªã‚¢ãƒ«é…åˆ—
+    
+    AnimeTransforms	m_animeTransform[MAX_ANIMEPATTERN];	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ–¹æ³•åˆ¥å¤‰å½¢æƒ…å ±
+    Animations		m_animes;			// ã‚¢ãƒ‹ãƒ¡é…åˆ—
+    AnimeNo			m_playNo;			// ç¾åœ¨å†ç”Ÿä¸­ã®ã‚¢ãƒ‹ãƒ¡ç•ªå·
+    AnimeNo			m_blendNo;			// ãƒ–ãƒ¬ãƒ³ãƒ‰å†ç”Ÿã‚’è¡Œã†ã‚¢ãƒ‹ãƒ¡ç•ªå·
+    AnimeNo			m_parametric[2];	// åˆæˆå†ç”Ÿã‚’è¡Œã†ã‚¢ãƒ‹ãƒ¡ç•ªå·
+    AnimeTime		m_blendTime;		// ç¾åœ¨ã®é·ç§»çµŒéæ™‚é–“
+    AnimeTime		m_blendTotalTime;	// ã‚¢ãƒ‹ãƒ¡é·ç§»ã«ã‹ã‹ã‚‹åˆè¨ˆæ™‚é–“
+    float			m_parametricBlend;	// ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯ã®å†ç”Ÿå‰²åˆ
 
-	MorphMeshes		m_morphes;		// ƒ‚[ƒt”z—ñ
-	MorphAnimations m_morphAnimes;	// ƒ‚[ƒtƒAƒjƒ”z—ñ
-	AnimeNo			m_morphPlayNo;	// Ä¶’†‚Ìƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“
+    MorphMeshes		m_morphes;		// ãƒ¢ãƒ¼ãƒ•é…åˆ—
+    MorphAnimations m_morphAnimes;	// ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡é…åˆ—
+    AnimeNo			m_morphPlayNo;	// å†ç”Ÿä¸­ã®ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 };
 
 

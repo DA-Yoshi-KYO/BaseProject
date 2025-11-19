@@ -4,488 +4,488 @@
 #include <assimp/postprocess.h>
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚Ì’Ç‰Á“Ç‚İ‚İ
-* @param[in] file “Ç‚İ‚İæƒpƒX
-* @return ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã®è¿½åŠ èª­ã¿è¾¼ã¿
+* @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+* @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
 */
 Model::AnimeNo Model::AddAnimation(const char* file)
 {
-	// Assimp‘¤‚Å“Ç‚İ‚İ‚ğÀs
-	const aiScene* pScene = static_cast<const aiScene*>(LoadAssimpScene(file));
-	if (!pScene)
-	{
+    // Assimpå´ã§èª­ã¿è¾¼ã¿ã‚’å®Ÿè¡Œ
+    const aiScene* pScene = static_cast<const aiScene*>(LoadAssimpScene(file));
+    if (!pScene)
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, false);
+        ShowErrorMessage(file, false);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (IsError(!pScene->HasAnimations(), "no animation."))
-	{
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (IsError(!pScene->HasAnimations(), "no animation."))
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, false);
+        ShowErrorMessage(file, false);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^Šm•Û
-	aiAnimation* assimpAnime = pScene->mAnimations[0];
-	m_animes.push_back(Animation());
-	Animation& anime = m_animes.back();
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ç¢ºä¿
+    aiAnimation* assimpAnime = pScene->mAnimations[0];
+    m_animes.push_back(Animation());
+    Animation& anime = m_animes.back();
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“İ’è
-	using XMVectorKey = std::pair<float, DirectX::XMVECTOR>;
-	using XMVectorKeys = std::map<float, DirectX::XMVECTOR>;
-	float fbxToGameFrame = static_cast<float>(assimpAnime->mTicksPerSecond);
-	anime.info.totalTime = static_cast<float>(assimpAnime->mDuration) / fbxToGameFrame;
-	anime.info.speed = 1.0f;
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨­å®š
+    using XMVectorKey = std::pair<float, DirectX::XMVECTOR>;
+    using XMVectorKeys = std::map<float, DirectX::XMVECTOR>;
+    float fbxToGameFrame = static_cast<float>(assimpAnime->mTicksPerSecond);
+    anime.info.totalTime = static_cast<float>(assimpAnime->mDuration) / fbxToGameFrame;
+    anime.info.speed = 1.0f;
 
-	anime.channels.resize(assimpAnime->mNumChannels);
-	AnimeChannels::iterator channelIt = anime.channels.begin();
-	for(auto channelIt = anime.channels.begin(); channelIt != anime.channels.end(); ++channelIt)
-	{
-		// ‘Î‰‚·‚éƒ`ƒƒƒ“ƒlƒ‹(ƒ{[ƒ“)‚ğ’Tõ
-		uint32_t channelIdx = static_cast<uint32_t>(channelIt - anime.channels.begin());
-		aiNodeAnim* assimpChannel = assimpAnime->mChannels[channelIdx];
-		channelIt->node = FindNode(assimpChannel->mNodeName.data);
-		if (channelIt->node == NODE_NONE) { continue; }
+    anime.channels.resize(assimpAnime->mNumChannels);
+    AnimeChannels::iterator channelIt = anime.channels.begin();
+    for(auto channelIt = anime.channels.begin(); channelIt != anime.channels.end(); ++channelIt)
+    {
+        // å¯¾å¿œã™ã‚‹ãƒãƒ£ãƒ³ãƒãƒ«(ãƒœãƒ¼ãƒ³)ã‚’æ¢ç´¢
+        uint32_t channelIdx = static_cast<uint32_t>(channelIt - anime.channels.begin());
+        aiNodeAnim* assimpChannel = assimpAnime->mChannels[channelIdx];
+        channelIt->node = FindNode(assimpChannel->mNodeName.data);
+        if (channelIt->node == NODE_NONE) { continue; }
 
-		// ŠeƒL[‚Ì’l‚ğ”z—ñ‚ÉƒRƒs[
-		XMVectorKeys keys[3];
-		AnimeTimeline& timeline = channelIt->timeline;
-		// ˆÊ’u
-		for (UINT i = 0; i < assimpChannel->mNumPositionKeys; ++i)
-		{
-			aiVectorKey& key = assimpChannel->mPositionKeys[i];
-			keys[0].insert(XMVectorKey(static_cast<float>(key.mTime) / fbxToGameFrame,
-				DirectX::XMVectorSet(key.mValue.x, key.mValue.y, key.mValue.z, 0.0f)
-			));
-		}
-		// ‰ñ“]
-		for (UINT i = 0; i < assimpChannel->mNumRotationKeys; ++i)
-		{
-			aiQuatKey& key = assimpChannel->mRotationKeys[i];
-			keys[1].insert(XMVectorKey(static_cast<float>(key.mTime) / fbxToGameFrame,
-				DirectX::XMVectorSet(key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w)));
-		}
-		// Šgk
-		for (UINT i = 0; i < assimpChannel->mNumScalingKeys; ++i)
-		{
-			aiVectorKey& key = assimpChannel->mScalingKeys[i];
-			keys[2].insert(XMVectorKey(static_cast<float>(key.mTime) / fbxToGameFrame,
-				DirectX::XMVectorSet(key.mValue.x, key.mValue.y, key.mValue.z, 0.0f)));
-		}
+        // å„ã‚­ãƒ¼ã®å€¤ã‚’é…åˆ—ã«ã‚³ãƒ”ãƒ¼
+        XMVectorKeys keys[3];
+        AnimeTimeline& timeline = channelIt->timeline;
+        // ä½ç½®
+        for (UINT i = 0; i < assimpChannel->mNumPositionKeys; ++i)
+        {
+            aiVectorKey& key = assimpChannel->mPositionKeys[i];
+            keys[0].insert(XMVectorKey(static_cast<float>(key.mTime) / fbxToGameFrame,
+                DirectX::XMVectorSet(key.mValue.x, key.mValue.y, key.mValue.z, 0.0f)
+            ));
+        }
+        // å›è»¢
+        for (UINT i = 0; i < assimpChannel->mNumRotationKeys; ++i)
+        {
+            aiQuatKey& key = assimpChannel->mRotationKeys[i];
+            keys[1].insert(XMVectorKey(static_cast<float>(key.mTime) / fbxToGameFrame,
+                DirectX::XMVectorSet(key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w)));
+        }
+        // æ‹¡ç¸®
+        for (UINT i = 0; i < assimpChannel->mNumScalingKeys; ++i)
+        {
+            aiVectorKey& key = assimpChannel->mScalingKeys[i];
+            keys[2].insert(XMVectorKey(static_cast<float>(key.mTime) / fbxToGameFrame,
+                DirectX::XMVectorSet(key.mValue.x, key.mValue.y, key.mValue.z, 0.0f)));
+        }
 
-		// Šeƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ìæ“ª‚ÌQÆ‚ğİ’è
-		XMVectorKeys::iterator it[] = { keys[0].begin(), keys[1].begin(), keys[2].begin() };
-		for (int i = 0; i < 3; ++i)
-		{
-			// ƒL[‚ªˆê‚Â‚µ‚©‚È‚¢ê‡‚ÍAQÆI—¹
-			if (keys[i].size() == 1)
-				++it[i];
-		}
+        // å„ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®å…ˆé ­ã®å‚ç…§ã‚’è¨­å®š
+        XMVectorKeys::iterator it[] = { keys[0].begin(), keys[1].begin(), keys[2].begin() };
+        for (int i = 0; i < 3; ++i)
+        {
+            // ã‚­ãƒ¼ãŒä¸€ã¤ã—ã‹ãªã„å ´åˆã¯ã€å‚ç…§çµ‚äº†
+            if (keys[i].size() == 1)
+                ++it[i];
+        }
 
-		// Še—v‘f‚²‚Æ‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚Å‚Í‚È‚­A‚·‚×‚Ä‚Ì•ÏŠ·‚ğŠÜ‚ß‚½ƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ìì¬
-		while (it[0] != keys[0].end() && it[1] != keys[1].end() && it[2] != keys[2].end())
-		{
-			// Œ»ó‚ÌQÆˆÊ’u‚Åˆê”Ô¬‚³‚¢ŠÔ‚ğæ“¾
-			float time = anime.info.totalTime;
-			for (int i = 0; i < 3; ++i)
-			{
-				if (it[i] != keys[i].end())
-				{
-					time = std::min(it[i]->first, time);
-				}
-			}
+        // å„è¦ç´ ã”ã¨ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã§ã¯ãªãã€ã™ã¹ã¦ã®å¤‰æ›ã‚’å«ã‚ãŸã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ä½œæˆ
+        while (it[0] != keys[0].end() && it[1] != keys[1].end() && it[2] != keys[2].end())
+        {
+            // ç¾çŠ¶ã®å‚ç…§ä½ç½®ã§ä¸€ç•ªå°ã•ã„æ™‚é–“ã‚’å–å¾—
+            float time = anime.info.totalTime;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (it[i] != keys[i].end())
+                {
+                    time = std::min(it[i]->first, time);
+                }
+            }
 
-			// ŠÔ‚ÉŠî‚Ã‚¢‚Ä•âŠÔ’l‚ğŒvZ
-			DirectX::XMVECTOR result[3];
-			for (int i = 0; i < 3; ++i)
-			{
-				// æ“ª‚ÌƒL[‚æ‚è¬‚³‚¢ŠÔ‚Å‚ ‚ê‚ÎAæ“ª‚Ì’l‚ğİ’è
-				if (time < keys[i].begin()->first)
-				{
-					result[i] = keys[i].begin()->second;
-				}
-				// ÅIƒL[‚æ‚è‘å‚«‚¢ŠÔ‚Å‚ ‚ê‚ÎAÅI‚Ì’l‚ğİ’è
-				else if (keys[i].rbegin()->first <= time)
-				{
-					result[i] = keys[i].rbegin()->second;
-					it[i] = keys[i].end();
-				}
-				// ƒL[“¯m‚É‹²‚Ü‚ê‚½ŠÔ‚Å‚ ‚ê‚ÎA•âŠÔ’l‚ğŒvZ
-				else
-				{
-					// QÆ‚µ‚Ä‚¢‚éŠÔ‚Æ“¯‚¶‚Å‚ ‚ê‚ÎAŸ‚ÌQÆ‚ÖƒL[‚ği‚ß‚é
-					if (it[i]->first <= time)
-					{
-						++it[i];
-					}
+            // æ™‚é–“ã«åŸºã¥ã„ã¦è£œé–“å€¤ã‚’è¨ˆç®—
+            DirectX::XMVECTOR result[3];
+            for (int i = 0; i < 3; ++i)
+            {
+                // å…ˆé ­ã®ã‚­ãƒ¼ã‚ˆã‚Šå°ã•ã„æ™‚é–“ã§ã‚ã‚Œã°ã€å…ˆé ­ã®å€¤ã‚’è¨­å®š
+                if (time < keys[i].begin()->first)
+                {
+                    result[i] = keys[i].begin()->second;
+                }
+                // æœ€çµ‚ã‚­ãƒ¼ã‚ˆã‚Šå¤§ãã„æ™‚é–“ã§ã‚ã‚Œã°ã€æœ€çµ‚ã®å€¤ã‚’è¨­å®š
+                else if (keys[i].rbegin()->first <= time)
+                {
+                    result[i] = keys[i].rbegin()->second;
+                    it[i] = keys[i].end();
+                }
+                // ã‚­ãƒ¼åŒå£«ã«æŒŸã¾ã‚ŒãŸæ™‚é–“ã§ã‚ã‚Œã°ã€è£œé–“å€¤ã‚’è¨ˆç®—
+                else
+                {
+                    // å‚ç…§ã—ã¦ã„ã‚‹æ™‚é–“ã¨åŒã˜ã§ã‚ã‚Œã°ã€æ¬¡ã®å‚ç…§ã¸ã‚­ãƒ¼ã‚’é€²ã‚ã‚‹
+                    if (it[i]->first <= time)
+                    {
+                        ++it[i];
+                    }
 
-					// •âŠÔ’l‚ÌŒvZ
-					XMVectorKeys::iterator prev = it[i];
-					--prev;
-					float rate = (time - prev->first) / (it[i]->first - prev->first);
-					result[i] = DirectX::XMVectorLerp(prev->second, it[i]->second, rate);
-				}
-			}
+                    // è£œé–“å€¤ã®è¨ˆç®—
+                    XMVectorKeys::iterator prev = it[i];
+                    --prev;
+                    float rate = (time - prev->first) / (it[i]->first - prev->first);
+                    result[i] = DirectX::XMVectorLerp(prev->second, it[i]->second, rate);
+                }
+            }
 
-			// w’èŠÔ‚ÉŠî‚Ã‚¢‚½ƒL[‚ğ’Ç‰Á
-			AnimeTransform transform;
-			DirectX::XMStoreFloat3(&transform.translate, result[0]);
-			DirectX::XMStoreFloat4(&transform.quaternion, result[1]);
-			DirectX::XMStoreFloat3(&transform.scale, result[2]);
-			timeline.insert(AnimeKey(time, transform));
-		}
-	}
+            // æŒ‡å®šæ™‚é–“ã«åŸºã¥ã„ãŸã‚­ãƒ¼ã‚’è¿½åŠ 
+            AnimeTransform transform;
+            DirectX::XMStoreFloat3(&transform.translate, result[0]);
+            DirectX::XMStoreFloat4(&transform.quaternion, result[1]);
+            DirectX::XMStoreFloat3(&transform.scale, result[2]);
+            timeline.insert(AnimeKey(time, transform));
+        }
+    }
 
-	// ƒAƒjƒ”Ô†‚ğ•Ô‚·
-	return static_cast<AnimeNo>(m_animes.size() - 1);
+    // ã‚¢ãƒ‹ãƒ¡ç•ªå·ã‚’è¿”ã™
+    return static_cast<AnimeNo>(m_animes.size() - 1);
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶
-* @param[in] no Ä¶‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-* @param[in] loop ƒ‹[ƒvÄ¶ƒtƒ‰ƒO
-* @param[in] speed Ä¶‘¬“x
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿ
+* @param[in] no å†ç”Ÿã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+* @param[in] loop ãƒ«ãƒ¼ãƒ—å†ç”Ÿãƒ•ãƒ©ã‚°
+* @param[in] speed å†ç”Ÿé€Ÿåº¦
 */
 void Model::PlayAnime(AnimeNo no, bool loop, float speed)
 {
-	// Ä¶ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no)) { return; }
-	if (m_playNo == no) { return; }
+    // å†ç”Ÿãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no)) { return; }
+    if (m_playNo == no) { return; }
 
-	// ‡¬ƒAƒjƒ[ƒVƒ‡ƒ“‚©ƒ`ƒFƒbƒN
-	if (no != PARAMETRIC_ANIME)
-	{
-		// ’Êí‚Ì‰Šú‰»
-		InitAnime(no);
-		m_animes[no].info.isLoop	= loop;
-		m_animes[no].info.speed		= speed;
-	}
-	else
-	{
-		// ‡¬ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌŒ³‚É‚È‚Á‚Ä‚¢‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ğ‰Šú‰»
-		InitAnime(m_parametric[0]);
-		InitAnime(m_parametric[1]);
-		m_animes[m_parametric[0]].info.isLoop = loop;
-		m_animes[m_parametric[1]].info.isLoop = loop;
-		SetParametricBlend(0.0f);
-	}
+    // åˆæˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‹ãƒã‚§ãƒƒã‚¯
+    if (no != PARAMETRIC_ANIME)
+    {
+        // é€šå¸¸ã®åˆæœŸåŒ–
+        InitAnime(no);
+        m_animes[no].info.isLoop	= loop;
+        m_animes[no].info.speed		= speed;
+    }
+    else
+    {
+        // åˆæˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å…ƒã«ãªã£ã¦ã„ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’åˆæœŸåŒ–
+        InitAnime(m_parametric[0]);
+        InitAnime(m_parametric[1]);
+        m_animes[m_parametric[0]].info.isLoop = loop;
+        m_animes[m_parametric[1]].info.isLoop = loop;
+        SetParametricBlend(0.0f);
+    }
 
-	// Ä¶ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìİ’è
-	m_playNo = no;
+    // å†ç”Ÿã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®è¨­å®š
+    m_playNo = no;
 }
 
 /*
-* @brief ƒuƒŒƒ“ƒhÄ¶
-* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-* @param[in] blendTime ƒuƒŒƒ“ƒh‚ÉŠ|‚¯‚éŠÔ
-* @param[in] loop ƒ‹[ƒvƒtƒ‰ƒO
-* @param[in] speed Ä¶‘¬“x
+* @brief ãƒ–ãƒ¬ãƒ³ãƒ‰å†ç”Ÿ
+* @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+* @param[in] blendTime ãƒ–ãƒ¬ãƒ³ãƒ‰ã«æ›ã‘ã‚‹æ™‚é–“
+* @param[in] loop ãƒ«ãƒ¼ãƒ—ãƒ•ãƒ©ã‚°
+* @param[in] speed å†ç”Ÿé€Ÿåº¦
 */
 void Model::PlayBlend(AnimeNo no, AnimeTime blendTime, bool loop, float speed)
 {
-	// Ä¶ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no)) { return; }
+    // å†ç”Ÿãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no)) { return; }
 
-	// ‡¬ƒAƒjƒ[ƒVƒ‡ƒ“‚©ƒ`ƒFƒbƒN
-	if (no != PARAMETRIC_ANIME)
-	{
-		InitAnime(no);
-		m_animes[no].info.isLoop = loop;
-		m_animes[no].info.speed = speed;
-	}
-	else
-	{
-		// ‡¬ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌŒ³‚É‚È‚Á‚Ä‚¢‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ğ‰Šú‰»
-		InitAnime(m_parametric[0]);
-		InitAnime(m_parametric[1]);
-		m_animes[m_parametric[0]].info.isLoop = loop;
-		m_animes[m_parametric[1]].info.isLoop = loop;
-		SetParametricBlend(0.0f);
-	}
+    // åˆæˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‹ãƒã‚§ãƒƒã‚¯
+    if (no != PARAMETRIC_ANIME)
+    {
+        InitAnime(no);
+        m_animes[no].info.isLoop = loop;
+        m_animes[no].info.speed = speed;
+    }
+    else
+    {
+        // åˆæˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å…ƒã«ãªã£ã¦ã„ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’åˆæœŸåŒ–
+        InitAnime(m_parametric[0]);
+        InitAnime(m_parametric[1]);
+        m_animes[m_parametric[0]].info.isLoop = loop;
+        m_animes[m_parametric[1]].info.isLoop = loop;
+        SetParametricBlend(0.0f);
+    }
 
-	// ƒuƒŒƒ“ƒh‚Ìİ’è
-	m_blendTime = 0.0f;
-	m_blendTotalTime = blendTime;
-	m_blendNo = no;
+    // ãƒ–ãƒ¬ãƒ³ãƒ‰ã®è¨­å®š
+    m_blendTime = 0.0f;
+    m_blendTotalTime = blendTime;
+    m_blendNo = no;
 }
 
 /*
-* @brief ‡¬Œ³ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìİ’è
-* @param[in] no1 ‡¬Œ³ƒAƒjƒ1
-* @param[in] no2 ‡¬Œ³ƒAƒjƒ2
+* @brief åˆæˆå…ƒã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®è¨­å®š
+* @param[in] no1 åˆæˆå…ƒã‚¢ãƒ‹ãƒ¡1
+* @param[in] no2 åˆæˆå…ƒã‚¢ãƒ‹ãƒ¡2
 */
 void Model::SetParametric(AnimeNo no1, AnimeNo no2)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no1)) { return; }
-	if (!CheckAnimeNo(no2)) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no1)) { return; }
+    if (!CheckAnimeNo(no2)) { return; }
 
-	// ‡¬İ’è
-	m_parametric[0] = no1;
-	m_parametric[1] = no2;
-	SetParametricBlend(0.0f);
+    // åˆæˆè¨­å®š
+    m_parametric[0] = no1;
+    m_parametric[1] = no2;
+    SetParametricBlend(0.0f);
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‡¬Š„‡İ’è
-* @param[in] blendRate ‡¬Š„‡
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®åˆæˆå‰²åˆè¨­å®š
+* @param[in] blendRate åˆæˆå‰²åˆ
 */
 void Model::SetParametricBlend(float blendRate)
 {
-	// ‡¬Œ³ƒAƒjƒ‚ªİ’è‚³‚ê‚Ä‚¢‚é‚©Šm”F
-	if (m_parametric[0] == ANIME_NONE || m_parametric[1] == ANIME_NONE) return;
+    // åˆæˆå…ƒã‚¢ãƒ‹ãƒ¡ãŒè¨­å®šã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
+    if (m_parametric[0] == ANIME_NONE || m_parametric[1] == ANIME_NONE) return;
 
-	// ‡¬Š„‡İ’è
-	m_parametricBlend = blendRate;
+    // åˆæˆå‰²åˆè¨­å®š
+    m_parametricBlend = blendRate;
 
-	// Š„‡‚ÉŠî‚Ã‚¢‚ÄƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶‘¬“x‚ğİ’è
-	Animation& anime1 = m_animes[m_parametric[0]];
-	Animation& anime2 = m_animes[m_parametric[1]];
-	float blendTotalTime =
-		anime1.info.totalTime * (1.0f - m_parametricBlend) +
-		anime2.info.totalTime * m_parametricBlend;
-	anime1.info.speed = anime1.info.totalTime / blendTotalTime;
-	anime2.info.speed = anime2.info.totalTime / blendTotalTime;
+    // å‰²åˆã«åŸºã¥ã„ã¦ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿé€Ÿåº¦ã‚’è¨­å®š
+    Animation& anime1 = m_animes[m_parametric[0]];
+    Animation& anime2 = m_animes[m_parametric[1]];
+    float blendTotalTime =
+        anime1.info.totalTime * (1.0f - m_parametricBlend) +
+        anime2.info.totalTime * m_parametricBlend;
+    anime1.info.speed = anime1.info.totalTime / blendTotalTime;
+    anime2.info.speed = anime2.info.totalTime / blendTotalTime;
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶ŠÔ‚ğ•ÏX
-* @param[in] no •ÏX‚·‚éƒAƒjƒ
-* @param[in] time V‚µ‚¢Ä¶ŠÔ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿæ™‚é–“ã‚’å¤‰æ›´
+* @param[in] no å¤‰æ›´ã™ã‚‹ã‚¢ãƒ‹ãƒ¡
+* @param[in] time æ–°ã—ã„å†ç”Ÿæ™‚é–“
 */
 void Model::SetAnimeTime(AnimeNo no, AnimeTime time)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no)) { return; }
-	if (no == PARAMETRIC_ANIME) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no)) { return; }
+    if (no == PARAMETRIC_ANIME) { return; }
 
-	// Ä¶ŠÔ•ÏX
-	Animation& anime = m_animes[no];
-	anime.info.nowTime = time;
-	CheckAnimePlayLoop(anime.info);
+    // å†ç”Ÿæ™‚é–“å¤‰æ›´
+    Animation& anime = m_animes[no];
+    anime.info.nowTime = time;
+    CheckAnimePlayLoop(anime.info);
 }
 
 
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV
-* @param[in] tick XVŠÔ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ›´æ–°
+* @param[in] tick æ›´æ–°æ™‚é–“
 */
 void Model::StepAnime(float tick)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Šm”F
-	if (m_playNo == ANIME_NONE) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿç¢ºèª
+    if (m_playNo == ANIME_NONE) { return; }
 
-	//--- ƒAƒjƒ[ƒVƒ‡ƒ“s—ñ‚ÌXV
-	// ƒpƒ‰ƒƒgƒŠƒbƒN
-	if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
-	{
-		CalcAnime(PARAMETRIC0, m_parametric[0]);
-		CalcAnime(PARAMETRIC1, m_parametric[1]);
-	}
-	// ƒƒCƒ“ƒAƒjƒ
-	if (m_playNo != ANIME_NONE && m_playNo != PARAMETRIC_ANIME)
-	{
-		CalcAnime(MAIN, m_playNo);
-	}
-	// ƒuƒŒƒ“ƒhƒAƒjƒ
-	if (m_blendNo != ANIME_NONE && m_blendNo != PARAMETRIC_ANIME)
-	{
-		CalcAnime(BLEND, m_blendNo);
-	}
+    //--- ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¡Œåˆ—ã®æ›´æ–°
+    // ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯
+    if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
+    {
+        CalcAnime(PARAMETRIC0, m_parametric[0]);
+        CalcAnime(PARAMETRIC1, m_parametric[1]);
+    }
+    // ãƒ¡ã‚¤ãƒ³ã‚¢ãƒ‹ãƒ¡
+    if (m_playNo != ANIME_NONE && m_playNo != PARAMETRIC_ANIME)
+    {
+        CalcAnime(MAIN, m_playNo);
+    }
+    // ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¢ãƒ‹ãƒ¡
+    if (m_blendNo != ANIME_NONE && m_blendNo != PARAMETRIC_ANIME)
+    {
+        CalcAnime(BLEND, m_blendNo);
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“s—ñ‚ÉŠî‚Ã‚¢‚Äœs—ñ‚ğXV
-	CalcBones(0, DirectX::XMMatrixScaling(m_loadScale, m_loadScale, m_loadScale));
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¡Œåˆ—ã«åŸºã¥ã„ã¦éª¨è¡Œåˆ—ã‚’æ›´æ–°
+    CalcBones(0, DirectX::XMMatrixScaling(m_loadScale, m_loadScale, m_loadScale));
 
-	//--- ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌŠÔXV
-	// ƒƒCƒ“ƒAƒjƒ
-	UpdateAnime(m_playNo, tick);
-	// ƒuƒŒƒ“ƒhƒAƒjƒ
-	if (m_blendNo != ANIME_NONE)
-	{
-		UpdateAnime(m_blendNo, tick);
-		m_blendTime += tick;
-		if (m_blendTime <= m_blendTime)
-		{
-			// ƒuƒŒƒ“ƒhƒAƒjƒ‚Ì©“®I—¹
-			m_blendTime = 0.0f;
-			m_blendTotalTime = 0.0f;
-			m_playNo = m_blendNo;
-			m_blendNo = ANIME_NONE;
-		}
-	}
-	// ƒpƒ‰ƒƒgƒŠƒbƒN
-	if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
-	{
-		UpdateAnime(m_parametric[0], tick);
-		UpdateAnime(m_parametric[1], tick);
-	}
+    //--- ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ™‚é–“æ›´æ–°
+    // ãƒ¡ã‚¤ãƒ³ã‚¢ãƒ‹ãƒ¡
+    UpdateAnime(m_playNo, tick);
+    // ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¢ãƒ‹ãƒ¡
+    if (m_blendNo != ANIME_NONE)
+    {
+        UpdateAnime(m_blendNo, tick);
+        m_blendTime += tick;
+        if (m_blendTime <= m_blendTime)
+        {
+            // ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¢ãƒ‹ãƒ¡ã®è‡ªå‹•çµ‚äº†
+            m_blendTime = 0.0f;
+            m_blendTotalTime = 0.0f;
+            m_playNo = m_blendNo;
+            m_blendNo = ANIME_NONE;
+        }
+    }
+    // ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯
+    if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
+    {
+        UpdateAnime(m_parametric[0], tick);
+        UpdateAnime(m_parametric[1], tick);
+    }
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“î•ñ‚Ì‰Šú‰»
-* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±ã®åˆæœŸåŒ–
+* @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
 */
 void Model::InitAnime(AnimeNo no)
 {
-	// ƒAƒjƒ‚Ìİ’è‚È‚µAƒpƒ‰ƒƒgƒŠƒbƒN‚Åİ’è‚³‚ê‚Ä‚¢‚é‚È‚ç‰Šú‰»‚µ‚È‚¢
-	if (no == ANIME_NONE || no == PARAMETRIC_ANIME) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ã®è¨­å®šãªã—ã€ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯ã§è¨­å®šã•ã‚Œã¦ã„ã‚‹ãªã‚‰åˆæœŸåŒ–ã—ãªã„
+    if (no == ANIME_NONE || no == PARAMETRIC_ANIME) { return; }
 
-	Animation& anime	= m_animes[no];
-	anime.info.nowTime	= 0.0f;
-	anime.info.speed	= 1.0f;
-	anime.info.isLoop	= false;
+    Animation& anime	= m_animes[no];
+    anime.info.nowTime	= 0.0f;
+    anime.info.speed	= 1.0f;
+    anime.info.isLoop	= false;
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV
-* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-* @param[in] tick XVŠÔ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ›´æ–°
+* @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+* @param[in] tick æ›´æ–°æ™‚é–“
 */
 void Model::UpdateAnime(AnimeNo no, float tick)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no)) { return; }
-	if (no == PARAMETRIC_ANIME) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no)) { return; }
+    if (no == PARAMETRIC_ANIME) { return; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ŠÔ‚ÌXV
-	Animation& anime = m_animes[no];
-	SetAnimeTime(no, anime.info.nowTime + anime.info.speed * tick);
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ™‚é–“ã®æ›´æ–°
+    Animation& anime = m_animes[no];
+    SetAnimeTime(no, anime.info.nowTime + anime.info.speed * tick);
 }
 
 /*
-* @brief ŠÔ‚É‰‚¶‚ÄƒAƒjƒ[ƒVƒ‡ƒ“‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ì’l‚ğŒvZ
-* @param[in] kind XV‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“‚Ìí—Ş
-* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
+* @brief æ™‚é–“ã«å¿œã˜ã¦ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®å€¤ã‚’è¨ˆç®—
+* @param[in] kind æ›´æ–°ã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ç¨®é¡
+* @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
 */
 void Model::CalcAnime(AnimePattern kind, AnimeNo no)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no)) { return; }
-	if (no == PARAMETRIC_ANIME) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no)) { return; }
+    if (no == PARAMETRIC_ANIME) { return; }
 
-	Animation& anime = m_animes[no];
-	AnimeChannels::iterator channelIt = anime.channels.begin();
-	for(auto channelIt = anime.channels.begin(); channelIt != anime.channels.end(); ++channelIt)
-	{
-		// ƒAƒjƒ[ƒVƒ‡ƒ“‚Å•ÏX‚·‚éƒ{[ƒ“‚ª‚È‚¯‚ê‚ÎƒXƒLƒbƒv
-		if (channelIt->node == NODE_NONE) { continue; }
+    Animation& anime = m_animes[no];
+    AnimeChannels::iterator channelIt = anime.channels.begin();
+    for(auto channelIt = anime.channels.begin(); channelIt != anime.channels.end(); ++channelIt)
+    {
+        // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã§å¤‰æ›´ã™ã‚‹ãƒœãƒ¼ãƒ³ãŒãªã‘ã‚Œã°ã‚¹ã‚­ãƒƒãƒ—
+        if (channelIt->node == NODE_NONE) { continue; }
 
-		// ƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ìİ’è‚ª‚È‚¯‚ê‚ÎƒXƒLƒbƒv
-		AnimeTimeline& timeline = channelIt->timeline;
-		if (timeline.empty()) { continue; }
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®è¨­å®šãŒãªã‘ã‚Œã°ã‚¹ã‚­ãƒƒãƒ—
+        AnimeTimeline& timeline = channelIt->timeline;
+        if (timeline.empty()) { continue; }
 
-		// ƒ{[ƒ“‚Ìp¨‚ğƒ^ƒCƒ€ƒ‰ƒCƒ“‚É‰ˆ‚Á‚ÄXV
-		AnimeTransform& transform = m_animeTransform[kind][channelIt->node];
-		if (timeline.size() <= 1)
-		{
-			// ƒL[‚ªˆê‚Â‚µ‚©‚È‚¢‚Ì‚Å’l‚ğ‚»‚Ì‚Ü‚Üg—p
-			transform = channelIt->timeline[0];
-		}
-		else
-		{
-			AnimeTimeline::iterator startIt = timeline.begin();
-			if (anime.info.nowTime <= startIt->first)
-			{
-				// æ“ªƒL[‚æ‚è‚à‘O‚ÌŠÔ‚È‚çAæ“ª‚Ì’l‚ğg—p
-				transform = startIt->second;
-			}
-			else if (timeline.rbegin()->first <= anime.info.nowTime)
-			{
-				// ÅIƒL[‚æ‚è‚àŒã‚ÌŠÔ‚È‚çAÅŒã‚Ì’l‚ğg—p
-				transform = timeline.rbegin()->second;
-			}
-			else
-			{
-				// w’è‚³‚ê‚½ŠÔ‚ğ‹²‚Ş2‚Â‚ÌƒL[‚©‚çA•âŠÔ‚³‚ê‚½’l‚ğŒvZ
-				AnimeTimeline::iterator nextIt = timeline.upper_bound(anime.info.nowTime);
-				startIt = nextIt;
-				--startIt;
-				float rate = (anime.info.nowTime - startIt->first) / (nextIt->first - startIt->first);
-				LerpTransform(&transform, startIt->second, nextIt->second, rate);
-			}
-		}
-	}
+        // ãƒœãƒ¼ãƒ³ã®å§¿å‹¢ã‚’ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã«æ²¿ã£ã¦æ›´æ–°
+        AnimeTransform& transform = m_animeTransform[kind][channelIt->node];
+        if (timeline.size() <= 1)
+        {
+            // ã‚­ãƒ¼ãŒä¸€ã¤ã—ã‹ãªã„ã®ã§å€¤ã‚’ãã®ã¾ã¾ä½¿ç”¨
+            transform = channelIt->timeline[0];
+        }
+        else
+        {
+            AnimeTimeline::iterator startIt = timeline.begin();
+            if (anime.info.nowTime <= startIt->first)
+            {
+                // å…ˆé ­ã‚­ãƒ¼ã‚ˆã‚Šã‚‚å‰ã®æ™‚é–“ãªã‚‰ã€å…ˆé ­ã®å€¤ã‚’ä½¿ç”¨
+                transform = startIt->second;
+            }
+            else if (timeline.rbegin()->first <= anime.info.nowTime)
+            {
+                // æœ€çµ‚ã‚­ãƒ¼ã‚ˆã‚Šã‚‚å¾Œã®æ™‚é–“ãªã‚‰ã€æœ€å¾Œã®å€¤ã‚’ä½¿ç”¨
+                transform = timeline.rbegin()->second;
+            }
+            else
+            {
+                // æŒ‡å®šã•ã‚ŒãŸæ™‚é–“ã‚’æŒŸã‚€2ã¤ã®ã‚­ãƒ¼ã‹ã‚‰ã€è£œé–“ã•ã‚ŒãŸå€¤ã‚’è¨ˆç®—
+                AnimeTimeline::iterator nextIt = timeline.upper_bound(anime.info.nowTime);
+                startIt = nextIt;
+                --startIt;
+                float rate = (anime.info.nowTime - startIt->first) / (nextIt->first - startIt->first);
+                LerpTransform(&transform, startIt->second, nextIt->second, rate);
+            }
+        }
+    }
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶•û–@•Ê‚ÉŒvZ‚³‚ê‚Ä‚¢‚és—ñ‚ğ‡¬
-* @param[in] index ŒvZ‘ÎÛ‚Ìƒm[ƒh
-* @param[in] parennt e‚Ìp¨s—ñ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ–¹æ³•åˆ¥ã«è¨ˆç®—ã•ã‚Œã¦ã„ã‚‹è¡Œåˆ—ã‚’åˆæˆ
+* @param[in] index è¨ˆç®—å¯¾è±¡ã®ãƒãƒ¼ãƒ‰
+* @param[in] parennt è¦ªã®å§¿å‹¢è¡Œåˆ—
 */
 void Model::CalcBones(NodeIndex index, const DirectX::XMMATRIX parent)
 {
-	AnimeTransform transform; // ‡¬Œ‹‰Ê‚ÌŠi”[æ
+    AnimeTransform transform; // åˆæˆçµæœã®æ ¼ç´å…ˆ
 
-	// ƒpƒ‰ƒƒgƒŠƒbƒN‚Ì‡¬
-	if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
-	{
-		LerpTransform(&transform,
-			m_animeTransform[PARAMETRIC0][index],
-			m_animeTransform[PARAMETRIC1][index],
-			m_parametricBlend);
+    // ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯ã®åˆæˆ
+    if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
+    {
+        LerpTransform(&transform,
+            m_animeTransform[PARAMETRIC0][index],
+            m_animeTransform[PARAMETRIC1][index],
+            m_parametricBlend);
 
-		// ‚Ì‚¿‚ÌƒuƒŒƒ“ƒh‚Æ‚Ì‡¬‚Ì‚½‚ß‚ÉAƒpƒ‰ƒƒgƒŠƒbƒN‚ÌŒ‹‰Ê‚ğÄ¶EƒuƒŒƒ“ƒh‚Ì‚¢‚¸‚ê‚©‚ÉŠi”[
-		if (m_playNo == PARAMETRIC_ANIME) { m_animeTransform[MAIN][index] = transform; }
-		if (m_blendNo == PARAMETRIC_ANIME) { m_animeTransform[BLEND][index] = transform; }
-	}
+        // ã®ã¡ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ã¨ã®åˆæˆã®ãŸã‚ã«ã€ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯ã®çµæœã‚’å†ç”Ÿãƒ»ãƒ–ãƒ¬ãƒ³ãƒ‰ã®ã„ãšã‚Œã‹ã«æ ¼ç´
+        if (m_playNo == PARAMETRIC_ANIME) { m_animeTransform[MAIN][index] = transform; }
+        if (m_blendNo == PARAMETRIC_ANIME) { m_animeTransform[BLEND][index] = transform; }
+    }
 
-	// ƒuƒŒƒ“ƒhƒAƒjƒ‚Ì‡¬
-	if (m_blendNo != ANIME_NONE)
-	{
-		LerpTransform(&transform,
-			m_animeTransform[MAIN][index],
-			m_animeTransform[BLEND][index],
-			m_blendTime / m_blendTotalTime);
-	}
-	else
-	{
-		// ‡¬‚Ì•K—v‚ª‚È‚©‚Á‚½‚Ì‚ÅAƒƒCƒ“‚Ìî•ñ‚ğ‚»‚Ì‚Ü‚ÜŠi”[
-		transform = m_animeTransform[MAIN][index];
-	}
+    // ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¢ãƒ‹ãƒ¡ã®åˆæˆ
+    if (m_blendNo != ANIME_NONE)
+    {
+        LerpTransform(&transform,
+            m_animeTransform[MAIN][index],
+            m_animeTransform[BLEND][index],
+            m_blendTime / m_blendTotalTime);
+    }
+    else
+    {
+        // åˆæˆã®å¿…è¦ãŒãªã‹ã£ãŸã®ã§ã€ãƒ¡ã‚¤ãƒ³ã®æƒ…å ±ã‚’ãã®ã¾ã¾æ ¼ç´
+        transform = m_animeTransform[MAIN][index];
+    }
 
-	// ŠY“–ƒm[ƒh‚Ìp¨s—ñ‚ğŒvZ
-	Node& node = m_nodes[index];
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&transform.translate));
-	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&transform.quaternion));
-	DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&transform.scale));
-	node.mat = (S * R * T) * parent;
+    // è©²å½“ãƒãƒ¼ãƒ‰ã®å§¿å‹¢è¡Œåˆ—ã‚’è¨ˆç®—
+    Node& node = m_nodes[index];
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&transform.translate));
+    DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&transform.quaternion));
+    DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&transform.scale));
+    node.mat = (S * R * T) * parent;
 
-	// q—v‘f‚Ìp¨‚ğXV
-	Children::iterator it = node.children.begin();
-	while (it != node.children.end())
-	{
-		CalcBones(*it, node.mat);
-		++it;
-	}
+    // å­è¦ç´ ã®å§¿å‹¢ã‚’æ›´æ–°
+    Children::iterator it = node.children.begin();
+    while (it != node.children.end())
+    {
+        CalcBones(*it, node.mat);
+        ++it;
+    }
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì•âŠÔ
-* @param[out] pOut Œ‹‰Ê‚ÌŠi”[æ
-* @param[in] a •âŠÔŒ³1
-* @param[in] b •âŠÔŒ³2
-* @param[in] rate •âŠÔŠ„‡
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®è£œé–“
+* @param[out] pOut çµæœã®æ ¼ç´å…ˆ
+* @param[in] a è£œé–“å…ƒ1
+* @param[in] b è£œé–“å…ƒ2
+* @param[in] rate è£œé–“å‰²åˆ
 */
 void Model::LerpTransform(AnimeTransform* pOut, const AnimeTransform& a, const AnimeTransform& b, float rate)
 {
-	// •âŠÔŒ³‚Ìî•ñ‚ğƒxƒNƒgƒ‹‚ÉŠi”[
-	DirectX::XMVECTOR vec[][2] = {
-		{ DirectX::XMLoadFloat3(&a.translate),	DirectX::XMLoadFloat3(&b.translate) },
-		{ DirectX::XMLoadFloat4(&a.quaternion),	DirectX::XMLoadFloat4(&b.quaternion) },
-		{ DirectX::XMLoadFloat3(&a.scale),		DirectX::XMLoadFloat3(&b.scale) },
-	};
+    // è£œé–“å…ƒã®æƒ…å ±ã‚’ãƒ™ã‚¯ãƒˆãƒ«ã«æ ¼ç´
+    DirectX::XMVECTOR vec[][2] = {
+        { DirectX::XMLoadFloat3(&a.translate),	DirectX::XMLoadFloat3(&b.translate) },
+        { DirectX::XMLoadFloat4(&a.quaternion),	DirectX::XMLoadFloat4(&b.quaternion) },
+        { DirectX::XMLoadFloat3(&a.scale),		DirectX::XMLoadFloat3(&b.scale) },
+    };
 
-	// •âŠÔ(¦Quaternion‚¾‚¯‚Í‹…–Ê•âŠÔ‚ª•K—vH
-	for (int i = 0; i < 3; ++i)
-		vec[i][0] = DirectX::XMVectorLerp(vec[i][0], vec[i][1], rate);
+    // è£œé–“(â€»Quaternionã ã‘ã¯çƒé¢è£œé–“ãŒå¿…è¦ï¼Ÿ
+    for (int i = 0; i < 3; ++i)
+        vec[i][0] = DirectX::XMVectorLerp(vec[i][0], vec[i][1], rate);
 
-	// ŒvZŒ‹‰Ê‚ÌŠi”[
-	DirectX::XMStoreFloat3(&pOut->translate, vec[0][0]);
-	DirectX::XMStoreFloat4(&pOut->quaternion, vec[1][0]);
-	DirectX::XMStoreFloat3(&pOut->scale, vec[2][0]);
+    // è¨ˆç®—çµæœã®æ ¼ç´
+    DirectX::XMStoreFloat3(&pOut->translate, vec[0][0]);
+    DirectX::XMStoreFloat4(&pOut->quaternion, vec[1][0]);
+    DirectX::XMStoreFloat3(&pOut->scale, vec[2][0]);
 }

@@ -4,531 +4,531 @@
 #include <assimp/postprocess.h>
 
 /*
-* @brief ƒ‚[ƒtƒf[ƒ^‚Ì’Ç‰Á
-* @param[in] file “Ç‚İ‚İæƒpƒX
-* @param[out] out “Ç‚İæ‚Á‚½ƒf[ƒ^‚ÉŠ„‚è“–‚Ä‚ç‚ê‚½ƒCƒ“ƒfƒbƒNƒX(•¡”“Ç‚İ‚Ş‰Â”\«‚ª‚ ‚é‚½‚ß
-* @return “Ç‚İæ‚èŒ‹‰Ê
+* @brief ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿ã®è¿½åŠ 
+* @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+* @param[out] out èª­ã¿å–ã£ãŸãƒ‡ãƒ¼ã‚¿ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚ŒãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹(è¤‡æ•°èª­ã¿è¾¼ã‚€å¯èƒ½æ€§ãŒã‚ã‚‹ãŸã‚
+* @return èª­ã¿å–ã‚Šçµæœ
 */
 bool Model::AddMorph(const char* file, Indices* out)
 {
-	// Assimp‘¤‚Å“Ç‚İ‚İ‚ğÀs
-	const aiScene* pScene = static_cast<const aiScene*>(LoadAssimpScene(file));
-	if (!pScene)
-	{
+    // Assimpå´ã§èª­ã¿è¾¼ã¿ã‚’å®Ÿè¡Œ
+    const aiScene* pScene = static_cast<const aiScene*>(LoadAssimpScene(file));
+    if (!pScene)
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, false);
+        ShowErrorMessage(file, false);
 #endif
-		return false;
-	}
+        return false;
+    }
 
-	// ƒƒbƒVƒ…ƒ`ƒFƒbƒN
-	if (IsError(!pScene->HasMeshes(), "no meshes."))
-	{
+    // ãƒ¡ãƒƒã‚·ãƒ¥ãƒã‚§ãƒƒã‚¯
+    if (IsError(!pScene->HasMeshes(), "no meshes."))
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, true);
+        ShowErrorMessage(file, true);
 #endif
-		return false;
-	}
+        return false;
+    }
 
-	// ƒƒbƒVƒ…‚²‚Æ‚ÉŠ„‚è“–‚Ä‚ç‚ê‚Ä‚¢‚éƒ‚[ƒtƒ^[ƒQƒbƒg‚ğì¬
-	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
-	{
-		MakeMorphMesh(pScene->mMeshes[i], i, out);
-	}
+    // ãƒ¡ãƒƒã‚·ãƒ¥ã”ã¨ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚Œã¦ã„ã‚‹ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’ä½œæˆ
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
+    {
+        MakeMorphMesh(pScene->mMeshes[i], i, out);
+    }
 
 #if MODEL_FORCE_ERROR
-	ShowErrorMessage(file, true);
+    ShowErrorMessage(file, true);
 #endif
-	return true;
+    return true;
 }
 
 /*
-* @brief ƒ‚[ƒt‚Ì‡¬Š„‡‚ğw’è
-* @param[in] no ƒuƒŒƒ“ƒhŠ„‡‚ğ•ÏX‚·‚éƒ‚[ƒt‚Ìƒf[ƒ^
+* @brief ãƒ¢ãƒ¼ãƒ•ã®åˆæˆå‰²åˆã‚’æŒ‡å®š
+* @param[in] no ãƒ–ãƒ¬ãƒ³ãƒ‰å‰²åˆã‚’å¤‰æ›´ã™ã‚‹ãƒ¢ãƒ¼ãƒ•ã®ãƒ‡ãƒ¼ã‚¿
 */
 void Model::SetMorphWeight(MorphNo no, float weight)
 {
-	if (no < m_morphes.size())
-		m_morphes[no].weight = weight;
+    if (no < m_morphes.size())
+        m_morphes[no].weight = weight;
 }
 
 /*
-* @brief ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚Ì“Ç‚İ‚İ
-* @param[in] file “Ç‚İ‚İæƒpƒX
-* @return ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
+* @brief ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®èª­ã¿è¾¼ã¿
+* @param[in] file èª­ã¿è¾¼ã¿å…ˆãƒ‘ã‚¹
+* @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
 */
 Model::AnimeNo Model::AddMorphAnime(const char* file)
 {
-	// Assimp‘¤‚Å“Ç‚İ‚İ‚ğÀs
-	const aiScene* pScene = static_cast<const aiScene*>(LoadAssimpScene(file));
-	if (!pScene)
-	{
+    // Assimpå´ã§èª­ã¿è¾¼ã¿ã‚’å®Ÿè¡Œ
+    const aiScene* pScene = static_cast<const aiScene*>(LoadAssimpScene(file));
+    if (!pScene)
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, false);
+        ShowErrorMessage(file, false);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚Ìƒ`ƒFƒbƒN
-	if (IsError(!pScene->HasAnimations(), "no morph anime."))
-	{
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã®ãƒã‚§ãƒƒã‚¯
+    if (IsError(!pScene->HasAnimations(), "no morph anime."))
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, true);
+        ShowErrorMessage(file, true);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚Ìƒ`ƒFƒbƒN
-	aiAnimation* assimpAnime = pScene->mAnimations[0];
-	if (IsError(assimpAnime->mNumMorphMeshChannels <= 0, "no morph anime."))
-	{
+    // ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ãƒã‚§ãƒƒã‚¯
+    aiAnimation* assimpAnime = pScene->mAnimations[0];
+    if (IsError(assimpAnime->mNumMorphMeshChannels <= 0, "no morph anime."))
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, true);
+        ShowErrorMessage(file, true);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‘ÎÛ‚ÌƒƒbƒVƒ…‚ª“Ç‚İ‚Ü‚ê‚Ä‚¢‚é‚©Šm”F
-	aiMeshMorphAnim* assimpMorphAnime = assimpAnime->mMorphMeshChannels[0];
-	std::string meshName = assimpMorphAnime->mName.data;
-	meshName = meshName.substr(0, meshName.size() - 2); // assimp‚ÌƒAƒjƒ[ƒVƒ‡ƒ“–¼‚É(‘½•ª) "*0"‚ªŠÜ‚Ü‚ê‚é‚Ì‚Åíœ
-	NodeIndex mesh = FindNode(meshName.c_str());
-	if (IsError(mesh == NODE_NONE, "no match morph target mesh."))
-	{
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¯¾è±¡ã®ãƒ¡ãƒƒã‚·ãƒ¥ãŒèª­ã¿è¾¼ã¾ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
+    aiMeshMorphAnim* assimpMorphAnime = assimpAnime->mMorphMeshChannels[0];
+    std::string meshName = assimpMorphAnime->mName.data;
+    meshName = meshName.substr(0, meshName.size() - 2); // assimpã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³åã«(å¤šåˆ†) "*0"ãŒå«ã¾ã‚Œã‚‹ã®ã§å‰Šé™¤
+    NodeIndex mesh = FindNode(meshName.c_str());
+    if (IsError(mesh == NODE_NONE, "no match morph target mesh."))
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, false);
+        ShowErrorMessage(file, false);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ŠY“–‚ÌƒƒbƒVƒ…‚ÉŠ„‚è“–‚Ä‚ç‚ê‚Ä‚¢‚éƒ‚[ƒtƒf[ƒ^‚Ì–¼Ì‚ğæ“¾
-	using Names = std::vector<std::string>;
-	Names morphNames;
-	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-		
-		// ƒ‚[ƒtƒ^[ƒQƒbƒg‚Ì–¼Ì‚ÆƒƒbƒVƒ…‚Ì–¼Ì‚ğŠm”F
-		aiMesh* assimpMesh = pScene->mMeshes[i];
-		if (meshName != assimpMesh->mName.data) { continue; }
+    // è©²å½“ã®ãƒ¡ãƒƒã‚·ãƒ¥ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚Œã¦ã„ã‚‹ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿ã®åç§°ã‚’å–å¾—
+    using Names = std::vector<std::string>;
+    Names morphNames;
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        
+        // ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®åç§°ã¨ãƒ¡ãƒƒã‚·ãƒ¥ã®åç§°ã‚’ç¢ºèª
+        aiMesh* assimpMesh = pScene->mMeshes[i];
+        if (meshName != assimpMesh->mName.data) { continue; }
 
-		// ƒƒbƒVƒ…’†‚ÉŠ„‚è“–‚Ä‚ç‚ê‚Ä‚¢‚éƒ‚[ƒt‚Ì–¼Ì‚ğæ“¾
-		for (unsigned int j = 0; j < assimpMesh->mNumAnimMeshes; ++j) {
-			morphNames.push_back(assimpMesh->mAnimMeshes[j]->mName.data);
-		}
-		break;
-	}
+        // ãƒ¡ãƒƒã‚·ãƒ¥ä¸­ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚Œã¦ã„ã‚‹ãƒ¢ãƒ¼ãƒ•ã®åç§°ã‚’å–å¾—
+        for (unsigned int j = 0; j < assimpMesh->mNumAnimMeshes; ++j) {
+            morphNames.push_back(assimpMesh->mAnimMeshes[j]->mName.data);
+        }
+        break;
+    }
 
-	// Š„‚è“–‚Ä‚ç‚ê‚È‚©‚Á‚½–¼Ì‚ª‚È‚¢‚©Šm”F
-	if (IsError(morphNames.empty(), "no names."))
-	{
+    // å‰²ã‚Šå½“ã¦ã‚‰ã‚Œãªã‹ã£ãŸåç§°ãŒãªã„ã‹ç¢ºèª
+    if (IsError(morphNames.empty(), "no names."))
+    {
 #if MODEL_FORCE_ERROR
-		ShowErrorMessage(file, false);
+        ShowErrorMessage(file, false);
 #endif
-		return ANIME_NONE;
-	}
+        return ANIME_NONE;
+    }
 
-	// ŠmÀ‚ÉƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚ª‚ ‚è‚»‚¤‚È‚Ì‚ÅAƒf[ƒ^‚ğì¬
-	m_morphAnimes.push_back({});
-	MorphAnimation& anime = m_morphAnimes.back();
+    // ç¢ºå®Ÿã«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚Šãã†ãªã®ã§ã€ãƒ‡ãƒ¼ã‚¿ã‚’ä½œæˆ
+    m_morphAnimes.push_back({});
+    MorphAnimation& anime = m_morphAnimes.back();
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‘ÎÛ‚Ìƒ‚[ƒt‚Ì–¼Ì‚©‚çAŠù‚É“Ç‚İ‚Ü‚ê‚Ä‚¢‚éƒ‚[ƒtƒf[ƒ^‚ÌƒCƒ“ƒfƒbƒNƒX‚É•ÏŠ·
-	Names::iterator it = morphNames.begin();
-	while (it != morphNames.end()) {
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¯¾è±¡ã®ãƒ¢ãƒ¼ãƒ•ã®åç§°ã‹ã‚‰ã€æ—¢ã«èª­ã¿è¾¼ã¾ã‚Œã¦ã„ã‚‹ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã«å¤‰æ›
+    Names::iterator it = morphNames.begin();
+    while (it != morphNames.end()) {
 
-		// ƒ‚[ƒtƒf[ƒ^‚Ìˆê——‚©‚ç–¼‘O‚Æˆê’v‚·‚éƒf[ƒ^‚ğ’Tõ
-		auto morphIt = std::find_if(m_morphes.begin(), m_morphes.end(),
-			[&it](MorphMesh& mesh) {
-				return (*it) == mesh.name;
-			});
+        // ãƒ¢ãƒ¼ãƒ•ãƒ‡ãƒ¼ã‚¿ã®ä¸€è¦§ã‹ã‚‰åå‰ã¨ä¸€è‡´ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’æ¢ç´¢
+        auto morphIt = std::find_if(m_morphes.begin(), m_morphes.end(),
+            [&it](MorphMesh& mesh) {
+                return (*it) == mesh.name;
+            });
 
-		// ƒCƒ“ƒfƒbƒNƒX‚Ö•ÏŠ·
-		if (morphIt != m_morphes.end()) {
-			anime.morphs.push_back(static_cast<unsigned int>(morphIt - m_morphes.begin()));
-		}
-		else
-			anime.morphs.push_back(-1);
-		++it;
-	}
+        // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã¸å¤‰æ›
+        if (morphIt != m_morphes.end()) {
+            anime.morphs.push_back(static_cast<unsigned int>(morphIt - m_morphes.begin()));
+        }
+        else
+            anime.morphs.push_back(-1);
+        ++it;
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚Ì“Ç‚İæ‚è
-	MakeMorphTimeline(anime, assimpAnime);
-	// ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌÅIƒf[ƒ^‚ğƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶ŠÔ‚Æ‚µ‚ÄŠi”[
-	anime.info.totalTime = anime.timelines.back().time;
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã®èª­ã¿å–ã‚Š
+    MakeMorphTimeline(anime, assimpAnime);
+    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®æœ€çµ‚ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿæ™‚é–“ã¨ã—ã¦æ ¼ç´
+    anime.info.totalTime = anime.timelines.back().time;
 
 #if MODEL_FORCE_ERROR
-	ShowErrorMessage(file, true);
+    ShowErrorMessage(file, true);
 #endif
-	return static_cast<AnimeNo>(m_morphAnimes.size() - 1);
+    return static_cast<AnimeNo>(m_morphAnimes.size() - 1);
 }
 
 /*
-* @brief ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶
-* @param[in] no Ä¶‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“
-* @param[in] loop ƒ‹[ƒvÄ¶ƒtƒ‰ƒO
-* @param[in] speed Ä¶‘¬“x
+* @brief ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿ
+* @param[in] no å†ç”Ÿã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+* @param[in] loop ãƒ«ãƒ¼ãƒ—å†ç”Ÿãƒ•ãƒ©ã‚°
+* @param[in] speed å†ç”Ÿé€Ÿåº¦
 */
 void Model::PlayMorph(AnimeNo no, bool loop, float speed)
 {
-	if (no < m_morphAnimes.size()) {
-		m_morphPlayNo = no;
-		m_morphAnimes[no].info.isLoop = loop;
-		m_morphAnimes[no].info.speed = speed;
-		m_morphAnimes[no].info.nowTime = 0.0f;
-	}
+    if (no < m_morphAnimes.size()) {
+        m_morphPlayNo = no;
+        m_morphAnimes[no].info.isLoop = loop;
+        m_morphAnimes[no].info.speed = speed;
+        m_morphAnimes[no].info.nowTime = 0.0f;
+    }
 }
 
 
 
 /*
-* @brief ƒ‚[ƒt‚ÌƒƒbƒVƒ…ƒf[ƒ^ì¬
-* @param[in] ptr ƒƒbƒVƒ…ƒf[ƒ^
-* @param[in] meshIndex ƒ‚[ƒt‘Î‰‚³‚¹‚éƒƒbƒVƒ…‚ÌƒCƒ“ƒfƒbƒNƒX
-* @param[out] out ƒ‚[ƒt‚ğ•¡”“Ç‚İ‚ñ‚¾ê‡‚Ì“Ç‚İæ‚èƒCƒ“ƒfƒbƒNƒXî•ñ
+* @brief ãƒ¢ãƒ¼ãƒ•ã®ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿ä½œæˆ
+* @param[in] ptr ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿
+* @param[in] meshIndex ãƒ¢ãƒ¼ãƒ•å¯¾å¿œã•ã›ã‚‹ãƒ¡ãƒƒã‚·ãƒ¥ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+* @param[out] out ãƒ¢ãƒ¼ãƒ•ã‚’è¤‡æ•°èª­ã¿è¾¼ã‚“ã å ´åˆã®èª­ã¿å–ã‚Šã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±
 */
 void Model::MakeMorphMesh(const void* ptr, int meshIndex, Indices* out)
 {
-	const aiMesh* asmpMesh = static_cast<const aiMesh*>(ptr);
+    const aiMesh* asmpMesh = static_cast<const aiMesh*>(ptr);
 
-	// ƒ‚[ƒt‚ªŠÜ‚Ü‚ê‚éƒƒbƒVƒ…‚©ƒ`ƒFƒbƒN
-	unsigned int animeMeshNum = asmpMesh->mNumAnimMeshes;
-	if (animeMeshNum <= 0)
-	{
-		std::string msg;
-		msg += "no morph. [";
-		msg += asmpMesh->mName.data;
-		msg += "]";
-		SetErrorMessage(msg.c_str());
-		return;
-	}
+    // ãƒ¢ãƒ¼ãƒ•ãŒå«ã¾ã‚Œã‚‹ãƒ¡ãƒƒã‚·ãƒ¥ã‹ãƒã‚§ãƒƒã‚¯
+    unsigned int animeMeshNum = asmpMesh->mNumAnimMeshes;
+    if (animeMeshNum <= 0)
+    {
+        std::string msg;
+        msg += "no morph. [";
+        msg += asmpMesh->mName.data;
+        msg += "]";
+        SetErrorMessage(msg.c_str());
+        return;
+    }
 
-	// ‘‚«‚İ‰Â”\‚ÈƒƒbƒVƒ…‚É•ÏX
-	MeshBuffer* mesh = m_meshes[meshIndex].pMesh;
-	MeshBuffer::Description desc = mesh->GetDesc();
-	if (!desc.isWrite) {
-		desc.pVtx = m_meshes[meshIndex].vertices.data();
-		desc.pIdx = m_meshes[meshIndex].indices.data();
-		desc.isWrite = true;
-		mesh->Create(desc);
-	}
+    // æ›¸ãè¾¼ã¿å¯èƒ½ãªãƒ¡ãƒƒã‚·ãƒ¥ã«å¤‰æ›´
+    MeshBuffer* mesh = m_meshes[meshIndex].pMesh;
+    MeshBuffer::Description desc = mesh->GetDesc();
+    if (!desc.isWrite) {
+        desc.pVtx = m_meshes[meshIndex].vertices.data();
+        desc.pIdx = m_meshes[meshIndex].indices.data();
+        desc.isWrite = true;
+        mesh->Create(desc);
+    }
 
-	// ƒ‚[ƒtƒ^[ƒQƒbƒg‚ÌƒƒbƒVƒ…‚ğ¶¬
-	for (unsigned int i = 0; i < animeMeshNum; ++i)
-	{
-		const aiAnimMesh* animeMesh = asmpMesh->mAnimMeshes[i];
+    // ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆ
+    for (unsigned int i = 0; i < animeMeshNum; ++i)
+    {
+        const aiAnimMesh* animeMesh = asmpMesh->mAnimMeshes[i];
 
-		// ’¸“_”‚ªˆê’v‚µ‚Ä‚¢‚é‚©Šm”F
-		unsigned int vtxNum = animeMesh->mNumVertices;
-		if (vtxNum != m_meshes[meshIndex].vertices.size())
-		{
-			std::string msg;
-			msg += "no match morph vtxNum. [";
-			msg += animeMesh->mName.data;
-			msg += "]";
-			SetErrorMessage(msg.c_str());
-			continue;
-		}
+        // é ‚ç‚¹æ•°ãŒä¸€è‡´ã—ã¦ã„ã‚‹ã‹ç¢ºèª
+        unsigned int vtxNum = animeMesh->mNumVertices;
+        if (vtxNum != m_meshes[meshIndex].vertices.size())
+        {
+            std::string msg;
+            msg += "no match morph vtxNum. [";
+            msg += animeMesh->mName.data;
+            msg += "]";
+            SetErrorMessage(msg.c_str());
+            continue;
+        }
 
-		// ‚·‚Å‚É“¯–¼‚Ìƒ‚[ƒt‚ªì¬‚³‚ê‚Ä‚¢‚È‚¢‚©”»’è
-		auto it = std::find_if(m_morphes.begin(), m_morphes.end(),
-			[&animeMesh](MorphMesh& mesh) {
-				return mesh.name == animeMesh->mName.data;
-			});
-		if (it != m_morphes.end()) {
-			continue;
-		}
+        // ã™ã§ã«åŒåã®ãƒ¢ãƒ¼ãƒ•ãŒä½œæˆã•ã‚Œã¦ã„ãªã„ã‹åˆ¤å®š
+        auto it = std::find_if(m_morphes.begin(), m_morphes.end(),
+            [&animeMesh](MorphMesh& mesh) {
+                return mesh.name == animeMesh->mName.data;
+            });
+        if (it != m_morphes.end()) {
+            continue;
+        }
 
-		// ƒ‚[ƒt‚Ìî•ñ‚ğì¬
-		m_morphes.push_back({});
-		Model::MorphMesh& morph = m_morphes.back();
-		morph.name		= animeMesh->mName.data;
-		morph.meshNo	= meshIndex;
-		morph.weight	= animeMesh->mWeight;
-		MakeMorphVertices(morph.vertices, animeMesh);
+        // ãƒ¢ãƒ¼ãƒ•ã®æƒ…å ±ã‚’ä½œæˆ
+        m_morphes.push_back({});
+        Model::MorphMesh& morph = m_morphes.back();
+        morph.name		= animeMesh->mName.data;
+        morph.meshNo	= meshIndex;
+        morph.weight	= animeMesh->mWeight;
+        MakeMorphVertices(morph.vertices, animeMesh);
 
-		// ¶¬‚µ‚½ƒ‚[ƒt‚ÌƒCƒ“ƒfƒbƒNƒX‚ğì¬
-		if (out) {
-			out->push_back(static_cast<unsigned long>(m_morphes.size() - 1));
-		}
-	}
+        // ç”Ÿæˆã—ãŸãƒ¢ãƒ¼ãƒ•ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ä½œæˆ
+        if (out) {
+            out->push_back(static_cast<unsigned long>(m_morphes.size() - 1));
+        }
+    }
 }
 
 /*
-* @brief ƒ‚[ƒt‚Ì’¸“_ƒf[ƒ^ì¬
-* @param[out] out ’¸“_ƒf[ƒ^Ši”[æ
-* @param[in] ptr ƒƒbƒVƒ…î•ñ
+* @brief ãƒ¢ãƒ¼ãƒ•ã®é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ä½œæˆ
+* @param[out] out é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿æ ¼ç´å…ˆ
+* @param[in] ptr ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±
 */
 void Model::MakeMorphVertices(MorphVertices& out, const void* ptr)
 {
-	const aiAnimMesh* animeMesh = static_cast<const aiAnimMesh*>(ptr);
-	unsigned int vtxNum = animeMesh->mNumVertices;
+    const aiAnimMesh* animeMesh = static_cast<const aiAnimMesh*>(ptr);
+    unsigned int vtxNum = animeMesh->mNumVertices;
 
-	out.resize(vtxNum);
-	for(unsigned int i = 0; i < vtxNum; ++ i)
-	{
-		// À•W
-		if (animeMesh->HasPositions()) {
-			aiVector3D& vec = animeMesh->mVertices[i];
-			out[i].pos = { vec.x * m_loadScale, vec.y * m_loadScale, vec.z * m_loadScale };
-		}
-		// –@ü
-		if (animeMesh->HasNormals()) {
-			aiVector3D& vec = animeMesh->mNormals[i];
-			out[i].normal = { vec.x, vec.y, vec.z };
-		}
-		// UVÀ•W
-		if (animeMesh->HasTextureCoords(0)) {
-			aiVector3D& vec = animeMesh->mTextureCoords[0][i];
-			out[i].uv = { vec.x, vec.y };
-		}
-	}
+    out.resize(vtxNum);
+    for(unsigned int i = 0; i < vtxNum; ++ i)
+    {
+        // åº§æ¨™
+        if (animeMesh->HasPositions()) {
+            aiVector3D& vec = animeMesh->mVertices[i];
+            out[i].pos = { vec.x * m_loadScale, vec.y * m_loadScale, vec.z * m_loadScale };
+        }
+        // æ³•ç·š
+        if (animeMesh->HasNormals()) {
+            aiVector3D& vec = animeMesh->mNormals[i];
+            out[i].normal = { vec.x, vec.y, vec.z };
+        }
+        // UVåº§æ¨™
+        if (animeMesh->HasTextureCoords(0)) {
+            aiVector3D& vec = animeMesh->mTextureCoords[0][i];
+            out[i].uv = { vec.x, vec.y };
+        }
+    }
 }
 
 /*
-* @brief ƒ^ƒCƒ€ƒ‰ƒCƒ“ƒf[ƒ^‚Ìì¬
-* @param[out] anime ƒ^ƒCƒ€ƒ‰ƒCƒ“ƒf[ƒ^Ši”[Œ³
-* @param[in] ptr ƒ‚[ƒt‚ÌƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^
+* @brief ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
+* @param[out] anime ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿æ ¼ç´å…ƒ
+* @param[in] ptr ãƒ¢ãƒ¼ãƒ•ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿
 */
 void Model::MakeMorphTimeline(MorphAnimation& anime, const void* ptr)
 {
-	const aiAnimation* assimpAnime = static_cast<const aiAnimation*>(ptr);
-	const aiMeshMorphAnim* assimpMorphAnime = assimpAnime->mMorphMeshChannels[0];
-	float fbxToGameFrame = static_cast<float>(assimpAnime->mTicksPerSecond);
-	
-	// ƒL[”‚É‰‚¶‚Äƒ^ƒCƒ€ƒ‰ƒCƒ“ì¬
-	anime.timelines.resize(assimpMorphAnime->mNumKeys);
-	for (unsigned int i = 0; i < assimpMorphAnime->mNumKeys; ++i)
-	{
-		aiMeshMorphKey* assimpKey = &assimpMorphAnime->mKeys[i];
-		MorphTimeline& timeline = anime.timelines[i];
+    const aiAnimation* assimpAnime = static_cast<const aiAnimation*>(ptr);
+    const aiMeshMorphAnim* assimpMorphAnime = assimpAnime->mMorphMeshChannels[0];
+    float fbxToGameFrame = static_cast<float>(assimpAnime->mTicksPerSecond);
+    
+    // ã‚­ãƒ¼æ•°ã«å¿œã˜ã¦ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ä½œæˆ
+    anime.timelines.resize(assimpMorphAnime->mNumKeys);
+    for (unsigned int i = 0; i < assimpMorphAnime->mNumKeys; ++i)
+    {
+        aiMeshMorphKey* assimpKey = &assimpMorphAnime->mKeys[i];
+        MorphTimeline& timeline = anime.timelines[i];
 
-		// ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌƒL[ŠÔ‚ğİ’è
-		timeline.time = static_cast<float>(assimpKey->mTime) / fbxToGameFrame;
-		// –‘OŒvZÏ‚İ‚ÌŠ„‚è“–‚Äƒ‚[ƒt”‚É‰‚¶‚Äƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ìƒf[ƒ^‚ğŠg’£
-		timeline.weights.resize(anime.morphs.size());
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ã‚­ãƒ¼æ™‚é–“ã‚’è¨­å®š
+        timeline.time = static_cast<float>(assimpKey->mTime) / fbxToGameFrame;
+        // äº‹å‰è¨ˆç®—æ¸ˆã¿ã®å‰²ã‚Šå½“ã¦ãƒ¢ãƒ¼ãƒ•æ•°ã«å¿œã˜ã¦ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ãƒ‡ãƒ¼ã‚¿ã‚’æ‹¡å¼µ
+        timeline.weights.resize(anime.morphs.size());
 
-		// Šù‘¶ƒL[‚ğƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÉŠ„‚è“–‚Ä
-		int index = 0;
-		for (int j = 0; j < timeline.weights.size(); ++j) {
-			// Š„‚è“–‚ÄÏ‚İ‚Ìƒ‚[ƒt‚É‘Î‚·‚éƒL[‚ª‘¶İ‚·‚é‚©”»’è
-			if (assimpKey->mValues[index] == j) {
-				timeline.weights[assimpKey->mValues[index]] = static_cast<float>(assimpKey->mWeights[index]);
-				++index;
-			}
-			else
-			{
-				// Œã‚Ìˆ—‚Å•âŠÔƒf[ƒ^Ši”[æ‚Æ‚µ‚ÄA-1‚ğİ’è
-				timeline.weights[j] = -1.0f;
-			}
-		}
-	}
+        // æ—¢å­˜ã‚­ãƒ¼ã‚’ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã«å‰²ã‚Šå½“ã¦
+        int index = 0;
+        for (int j = 0; j < timeline.weights.size(); ++j) {
+            // å‰²ã‚Šå½“ã¦æ¸ˆã¿ã®ãƒ¢ãƒ¼ãƒ•ã«å¯¾ã™ã‚‹ã‚­ãƒ¼ãŒå­˜åœ¨ã™ã‚‹ã‹åˆ¤å®š
+            if (assimpKey->mValues[index] == j) {
+                timeline.weights[assimpKey->mValues[index]] = static_cast<float>(assimpKey->mWeights[index]);
+                ++index;
+            }
+            else
+            {
+                // å¾Œã®å‡¦ç†ã§è£œé–“ãƒ‡ãƒ¼ã‚¿æ ¼ç´å…ˆã¨ã—ã¦ã€-1ã‚’è¨­å®š
+                timeline.weights[j] = -1.0f;
+            }
+        }
+    }
 
-	// ƒL[‚ª‚È‚©‚Á‚½ƒf[ƒ^‚É‘Î‚µ‚Ä•âŠÔˆ—‚ğÀs
-	for (int i = 0; i < anime.morphs.size(); ++i)
-	{
-		int index = 0;
-		float value = anime.timelines[index].weights[i];
+    // ã‚­ãƒ¼ãŒãªã‹ã£ãŸãƒ‡ãƒ¼ã‚¿ã«å¯¾ã—ã¦è£œé–“å‡¦ç†ã‚’å®Ÿè¡Œ
+    for (int i = 0; i < anime.morphs.size(); ++i)
+    {
+        int index = 0;
+        float value = anime.timelines[index].weights[i];
 
-		// -1ˆÈŠO‚ÌƒL[‚ªo‚Ä‚­‚é‚Ü‚Å’Tõ
-		while (value < 0.0f) {
-			value = anime.timelines[index].weights[i];
-			++index;
-			if (index >= anime.timelines.size() && value < 0.0f) {
-				value = 0.0f; // ÅŒã‚Ü‚Å-1‚Ì’l‚ªŠi”[‚³‚ê‚Ä‚¢‚½ê‡
-				break;
-			}
-		}
+        // -1ä»¥å¤–ã®ã‚­ãƒ¼ãŒå‡ºã¦ãã‚‹ã¾ã§æ¢ç´¢
+        while (value < 0.0f) {
+            value = anime.timelines[index].weights[i];
+            ++index;
+            if (index >= anime.timelines.size() && value < 0.0f) {
+                value = 0.0f; // æœ€å¾Œã¾ã§-1ã®å€¤ãŒæ ¼ç´ã•ã‚Œã¦ã„ãŸå ´åˆ
+                break;
+            }
+        }
 
-		// ƒXƒ^[ƒg’n“_‚Ü‚Å–ß‚Á‚ÄA’TõˆÊ’u‚Ü‚Å“¯‚¶ƒf[ƒ^‚ğŠi”[
-		for (int j = index - 1; j >= 0; --j) {
-			anime.timelines[j].weights[i] = value;
-		}
+        // ã‚¹ã‚¿ãƒ¼ãƒˆåœ°ç‚¹ã¾ã§æˆ»ã£ã¦ã€æ¢ç´¢ä½ç½®ã¾ã§åŒã˜ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´
+        for (int j = index - 1; j >= 0; --j) {
+            anime.timelines[j].weights[i] = value;
+        }
 
-		// ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌI’[‚Ü‚Å-1‚ÌŒÂŠ‚É•âŠÔƒf[ƒ^‚ğŠi”[
-		while (index < anime.timelines.size() - 1) {
-			// ’TõˆÊ’u‚ÌXV
-			int start = index;
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®çµ‚ç«¯ã¾ã§-1ã®å€‹æ‰€ã«è£œé–“ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´
+        while (index < anime.timelines.size() - 1) {
+            // æ¢ç´¢ä½ç½®ã®æ›´æ–°
+            int start = index;
 
-			// -1ˆÈŠO‚ÌƒL[‚Ü‚Å’Tõ
-			do {
-				++index;
-				// I’[‚É“’B‚·‚é‚Ü‚Å-1‚µ‚©‚È‚¢ê‡AƒXƒ^[ƒg’n“_‚Ì’l‚ğŠi”[
-				if (index >= anime.timelines.size()) {
-					--index;
-					value = anime.timelines[start].weights[i];
-					break;
-				}
-				value = anime.timelines[index].weights[i];
-			} while (value < 0.0f);
+            // -1ä»¥å¤–ã®ã‚­ãƒ¼ã¾ã§æ¢ç´¢
+            do {
+                ++index;
+                // çµ‚ç«¯ã«åˆ°é”ã™ã‚‹ã¾ã§-1ã—ã‹ãªã„å ´åˆã€ã‚¹ã‚¿ãƒ¼ãƒˆåœ°ç‚¹ã®å€¤ã‚’æ ¼ç´
+                if (index >= anime.timelines.size()) {
+                    --index;
+                    value = anime.timelines[start].weights[i];
+                    break;
+                }
+                value = anime.timelines[index].weights[i];
+            } while (value < 0.0f);
 
-			// ŠJn’n“_‚©‚ç’TõˆÊ’u‚Ü‚Å•âŠÔƒf[ƒ^‚ğŠi”[
-			AnimeTime startTime	= anime.timelines[start].time;
-			AnimeTime timeLen	= anime.timelines[index].time - startTime;
-			float startValue	= anime.timelines[start].weights[i];
-			float endValue		= value;
-			for (int j = start + 1; j <= index; ++j) {
-				// Œ»İ‚ÌƒL[ˆÊ’u‚É‰‚¶‚½•âŠÔ‚Ì’l‚ğŒvZ
-				float rate = (anime.timelines[j].time - startTime) / timeLen;
-				anime.timelines[j].weights[i] = endValue * rate + startValue * (1.0f - rate);
-			}
-		}
-	}
+            // é–‹å§‹åœ°ç‚¹ã‹ã‚‰æ¢ç´¢ä½ç½®ã¾ã§è£œé–“ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´
+            AnimeTime startTime	= anime.timelines[start].time;
+            AnimeTime timeLen	= anime.timelines[index].time - startTime;
+            float startValue	= anime.timelines[start].weights[i];
+            float endValue		= value;
+            for (int j = start + 1; j <= index; ++j) {
+                // ç¾åœ¨ã®ã‚­ãƒ¼ä½ç½®ã«å¿œã˜ãŸè£œé–“ã®å€¤ã‚’è¨ˆç®—
+                float rate = (anime.timelines[j].time - startTime) / timeLen;
+                anime.timelines[j].weights[i] = endValue * rate + startValue * (1.0f - rate);
+            }
+        }
+    }
 }
 
 /*
-* @brief ƒ‚[ƒt‚Ì‡¬Œ‹‰Ê‚ÌXV
+* @brief ãƒ¢ãƒ¼ãƒ•ã®åˆæˆçµæœã®æ›´æ–°
 */
 void Model::UpdateMorph()
 {
-	// XV‰Â”\‚ÈƒƒbƒVƒ…‚ğ’Tõ
-	for(auto meshIt = m_meshes.begin(); meshIt != m_meshes.end(); ++ meshIt)
-	{
-		// ‘‚«‚İ•s‰Â‚ÌƒƒbƒVƒ…‚ÉŠÖ‚µ‚Ä‚Íˆ—‚ğs‚í‚È‚¢
-		if (!meshIt->pMesh->GetDesc().isWrite) { continue; }
+    // æ›´æ–°å¯èƒ½ãªãƒ¡ãƒƒã‚·ãƒ¥ã‚’æ¢ç´¢
+    for(auto meshIt = m_meshes.begin(); meshIt != m_meshes.end(); ++ meshIt)
+    {
+        // æ›¸ãè¾¼ã¿ä¸å¯ã®ãƒ¡ãƒƒã‚·ãƒ¥ã«é–¢ã—ã¦ã¯å‡¦ç†ã‚’è¡Œã‚ãªã„
+        if (!meshIt->pMesh->GetDesc().isWrite) { continue; }
 
-		// ŠY“–‚Ì”Ô†‚ÌƒƒbƒVƒ…‚Éˆê’v‚·‚éƒ‚[ƒtƒ^[ƒQƒbƒg‚ğ’Tõ
-		std::vector<int> morphIdx;
-		int meshNo = static_cast<int>(meshIt - m_meshes.begin());
-		auto morphIt = m_morphes.begin();
-		float totalWeight = 0.0f;
-		while (morphIt != m_morphes.end()) {
-			if (morphIt->meshNo == meshNo) {
-				if (morphIt->weight > FLT_EPSILON) {
-					// ƒƒbƒVƒ…‚É‚©‚©‚éÅ‘åƒEƒFƒCƒg‚ÌŒvZ
-					totalWeight += morphIt->weight;
-					// XV‚ª•K—v‚Èƒ‚[ƒt‚Ìî•ñ‚ğ•Û‘¶
-					morphIdx.push_back(static_cast<NodeIndex>(morphIt - m_morphes.begin()));
-				}
-			}
-			++morphIt;
-		}
+        // è©²å½“ã®ç•ªå·ã®ãƒ¡ãƒƒã‚·ãƒ¥ã«ä¸€è‡´ã™ã‚‹ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’æ¢ç´¢
+        std::vector<int> morphIdx;
+        int meshNo = static_cast<int>(meshIt - m_meshes.begin());
+        auto morphIt = m_morphes.begin();
+        float totalWeight = 0.0f;
+        while (morphIt != m_morphes.end()) {
+            if (morphIt->meshNo == meshNo) {
+                if (morphIt->weight > FLT_EPSILON) {
+                    // ãƒ¡ãƒƒã‚·ãƒ¥ã«ã‹ã‹ã‚‹æœ€å¤§ã‚¦ã‚§ã‚¤ãƒˆã®è¨ˆç®—
+                    totalWeight += morphIt->weight;
+                    // æ›´æ–°ãŒå¿…è¦ãªãƒ¢ãƒ¼ãƒ•ã®æƒ…å ±ã‚’ä¿å­˜
+                    morphIdx.push_back(static_cast<NodeIndex>(morphIt - m_morphes.begin()));
+                }
+            }
+            ++morphIt;
+        }
 
-		// ƒuƒŒƒ“ƒh‘O‚Ìƒf[ƒ^‚ğ–‘OƒRƒs[
-		Vertices vtx;
-		vtx.resize(meshIt->vertices.size());
-		for (unsigned int i = 0; i < meshIt->vertices.size(); ++i) {
-			vtx[i] = meshIt->vertices[i];
-			// ƒ‚[ƒt‚ÌƒuƒŒƒ“ƒh‘ÎÛ‚Ìƒf[ƒ^‚¾‚¯‰Šú‰»
-			vtx[i].pos = {};
-			vtx[i].normal = {};
-			vtx[i].uv = {};
-		}
+        // ãƒ–ãƒ¬ãƒ³ãƒ‰å‰ã®ãƒ‡ãƒ¼ã‚¿ã‚’äº‹å‰ã‚³ãƒ”ãƒ¼
+        Vertices vtx;
+        vtx.resize(meshIt->vertices.size());
+        for (unsigned int i = 0; i < meshIt->vertices.size(); ++i) {
+            vtx[i] = meshIt->vertices[i];
+            // ãƒ¢ãƒ¼ãƒ•ã®ãƒ–ãƒ¬ãƒ³ãƒ‰å¯¾è±¡ã®ãƒ‡ãƒ¼ã‚¿ã ã‘åˆæœŸåŒ–
+            vtx[i].pos = {};
+            vtx[i].normal = {};
+            vtx[i].uv = {};
+        }
 
 
-		// ƒuƒŒƒ“ƒh‚ÌŠ„‡‚ª1.0‚É–‚½‚È‚¢ê‡Ac‚è‚ÌŠ„‡‚ğƒfƒtƒHƒ‹ƒg‚Ì’¸“_‚Æ‚ÌƒuƒŒƒ“ƒh‚ÆŒ©‚È‚·
-		if (totalWeight < 1.0f)
-		{
-			float weight = 1.0f - totalWeight;
-			auto vtxIt = meshIt->vertices.begin();
-			while (vtxIt != meshIt->vertices.end()) {
-				AddMorphVtxWeight(
-					&vtx[vtxIt - meshIt->vertices.begin()],
-					{ vtxIt->pos, vtxIt->normal, vtxIt->uv }, weight);
-				++vtxIt;
-			}
-			totalWeight = 1.0f;
-		}
+        // ãƒ–ãƒ¬ãƒ³ãƒ‰ã®å‰²åˆãŒ1.0ã«æº€ãŸãªã„å ´åˆã€æ®‹ã‚Šã®å‰²åˆã‚’ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®é ‚ç‚¹ã¨ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ã¨è¦‹ãªã™
+        if (totalWeight < 1.0f)
+        {
+            float weight = 1.0f - totalWeight;
+            auto vtxIt = meshIt->vertices.begin();
+            while (vtxIt != meshIt->vertices.end()) {
+                AddMorphVtxWeight(
+                    &vtx[vtxIt - meshIt->vertices.begin()],
+                    { vtxIt->pos, vtxIt->normal, vtxIt->uv }, weight);
+                ++vtxIt;
+            }
+            totalWeight = 1.0f;
+        }
 
-		// ƒ‚[ƒtƒ^[ƒQƒbƒg‚ÉŠî‚Ã‚¢‚ÄƒuƒŒƒ“ƒh‚ÌŠ„‡‚ğw’è
-		auto idxIt = morphIdx.begin();
-		while (idxIt != morphIdx.end())
-		{
-			auto morph = m_morphes[*idxIt];
-			auto vtxIt = morph.vertices.begin();
-			while (vtxIt != morph.vertices.end()) {
-				AddMorphVtxWeight(
-					&vtx[vtxIt - morph.vertices.begin()],
-					*vtxIt, morph.weight / totalWeight);
-				++vtxIt;
-			}
-			++idxIt;
-		}
+        // ãƒ¢ãƒ¼ãƒ•ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã«åŸºã¥ã„ã¦ãƒ–ãƒ¬ãƒ³ãƒ‰ã®å‰²åˆã‚’æŒ‡å®š
+        auto idxIt = morphIdx.begin();
+        while (idxIt != morphIdx.end())
+        {
+            auto morph = m_morphes[*idxIt];
+            auto vtxIt = morph.vertices.begin();
+            while (vtxIt != morph.vertices.end()) {
+                AddMorphVtxWeight(
+                    &vtx[vtxIt - morph.vertices.begin()],
+                    *vtxIt, morph.weight / totalWeight);
+                ++vtxIt;
+            }
+            ++idxIt;
+        }
 
-		// ƒ‚[ƒt‚Ì‡¬Œ‹‰Ê‚ğ‘‚«‚İ
-		meshIt->pMesh->Write(vtx.data());
-	}
+        // ãƒ¢ãƒ¼ãƒ•ã®åˆæˆçµæœã‚’æ›¸ãè¾¼ã¿
+        meshIt->pMesh->Write(vtx.data());
+    }
 }
 
 /*
-* @brief ƒ‚[ƒtƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV
-* @param[in] tick XVŠÔ
+* @brief ãƒ¢ãƒ¼ãƒ•ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ›´æ–°
+* @param[in] tick æ›´æ–°æ™‚é–“
 */
 void Model::StepMorph(float tick)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (m_morphPlayNo == ANIME_NONE) { return; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (m_morphPlayNo == ANIME_NONE) { return; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶ŠÔ‚ÌXV
-	MorphAnimation& anime = m_morphAnimes[m_morphPlayNo];
-	anime.info.nowTime += tick * anime.info.speed;
-	CheckAnimePlayLoop(anime.info);
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ™‚é–“ã®æ›´æ–°
+    MorphAnimation& anime = m_morphAnimes[m_morphPlayNo];
+    anime.info.nowTime += tick * anime.info.speed;
+    CheckAnimePlayLoop(anime.info);
 
-	// Œ»İ‚Ì‚©‚çŠeƒ‚[ƒt‚ÌƒuƒŒƒ“ƒhŠ„‡‚ğŒvZ
-	float totalWeight = 0.0f;
-	if (anime.info.nowTime <= anime.timelines[0].time)
-	{
-		// Å‰‚ÌƒL[‚æ‚è‘O‚ÌŠÔ‚ÍAæ“ª‚Ì’l‚ÅŒvZ
-		SetMorphWeight(m_morphPlayNo, anime.timelines[0].weights[0]);
-		totalWeight += anime.timelines[0].weights[0];
-	}
-	else if (anime.info.nowTime >= anime.timelines.back().time)
-	{
-		// ÅI‚ÌƒL[‚æ‚èŒã‚ÌŠÔ‚ÍAÅI‚Ì’l‚ÅŒvZ
-		SetMorphWeight(m_morphPlayNo, anime.timelines.back().weights[0]);
-		totalWeight = anime.timelines.back().weights[0];
-	}
-	else
-	{
-		// ƒ^ƒCƒ€ƒ‰ƒCƒ“’†‚Ì’l‚ÍA‘OŒã‚ÌƒL[‚Ì•âŠÔ‚ÅŒvZ
-		for (int i = 1; i < anime.timelines.size(); ++i)
-		{
-			if (anime.info.nowTime > anime.timelines[i].time) { continue; }
+    // ç¾åœ¨ã®æ™‚åˆ»ã‹ã‚‰å„ãƒ¢ãƒ¼ãƒ•ã®ãƒ–ãƒ¬ãƒ³ãƒ‰å‰²åˆã‚’è¨ˆç®—
+    float totalWeight = 0.0f;
+    if (anime.info.nowTime <= anime.timelines[0].time)
+    {
+        // æœ€åˆã®ã‚­ãƒ¼ã‚ˆã‚Šå‰ã®æ™‚é–“ã¯ã€å…ˆé ­ã®å€¤ã§è¨ˆç®—
+        SetMorphWeight(m_morphPlayNo, anime.timelines[0].weights[0]);
+        totalWeight += anime.timelines[0].weights[0];
+    }
+    else if (anime.info.nowTime >= anime.timelines.back().time)
+    {
+        // æœ€çµ‚ã®ã‚­ãƒ¼ã‚ˆã‚Šå¾Œã®æ™‚é–“ã¯ã€æœ€çµ‚ã®å€¤ã§è¨ˆç®—
+        SetMorphWeight(m_morphPlayNo, anime.timelines.back().weights[0]);
+        totalWeight = anime.timelines.back().weights[0];
+    }
+    else
+    {
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ä¸­ã®å€¤ã¯ã€å‰å¾Œã®ã‚­ãƒ¼ã®è£œé–“ã§è¨ˆç®—
+        for (int i = 1; i < anime.timelines.size(); ++i)
+        {
+            if (anime.info.nowTime > anime.timelines[i].time) { continue; }
 
-			// •âŠÔ‚ÌŠ„‡‚ğŒvZ
-			auto start	= anime.timelines[i - 1];
-			auto end	= anime.timelines[i];
-			float rate = (anime.info.nowTime - start.time) / (end.time - start.time);
+            // è£œé–“ã®å‰²åˆã‚’è¨ˆç®—
+            auto start	= anime.timelines[i - 1];
+            auto end	= anime.timelines[i];
+            float rate = (anime.info.nowTime - start.time) / (end.time - start.time);
 
-			// •¡”ƒ‚[ƒt‚ÌƒuƒŒƒ“ƒh—¦‚ğŒvZ
-			for (int j = 0; j < anime.morphs.size(); ++j) {
-				float weight = end.weights[j] * rate + start.weights[j] * (1.0f - rate);
-				SetMorphWeight(anime.morphs[j], weight);
-				totalWeight += weight;
-			}
-			break;
-		}
-	}
+            // è¤‡æ•°ãƒ¢ãƒ¼ãƒ•ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ç‡ã‚’è¨ˆç®—
+            for (int j = 0; j < anime.morphs.size(); ++j) {
+                float weight = end.weights[j] * rate + start.weights[j] * (1.0f - rate);
+                SetMorphWeight(anime.morphs[j], weight);
+                totalWeight += weight;
+            }
+            break;
+        }
+    }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‘ÎÛˆÈŠO‚Ìƒ‚[ƒt‚ÌƒuƒŒƒ“ƒh‚ğ•ÏX
-	float weight = 1.0f - std::min(1.0f, totalWeight);
-	for (int i = 0; i < m_morphes.size(); ++i) {
-		bool isAnime = false;
-		for (int j = 0; j < anime.morphs.size(); ++j) {
-			if (i == anime.morphs[j]) {
-				isAnime = true;
-				break;
-			}
-		}
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¯¾è±¡ä»¥å¤–ã®ãƒ¢ãƒ¼ãƒ•ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚’å¤‰æ›´
+    float weight = 1.0f - std::min(1.0f, totalWeight);
+    for (int i = 0; i < m_morphes.size(); ++i) {
+        bool isAnime = false;
+        for (int j = 0; j < anime.morphs.size(); ++j) {
+            if (i == anime.morphs[j]) {
+                isAnime = true;
+                break;
+            }
+        }
 
-		if (!isAnime) {
-			SetMorphWeight(i, m_morphes[i].weight * weight);
-		}
-	}
+        if (!isAnime) {
+            SetMorphWeight(i, m_morphes[i].weight * weight);
+        }
+    }
 }
 
 /*
-* @brief ƒ‚[ƒt‡¬‚Ì’¸“_ƒf[ƒ^‚ÌŒvZ
-* @param[out] out ‡¬æƒf[ƒ^
-* @param[in] in ‡¬Œ³ƒf[ƒ^
-* @param[in] weight Œ³ƒf[ƒ^‚Ì‡¬Š„‡
+* @brief ãƒ¢ãƒ¼ãƒ•åˆæˆæ™‚ã®é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã®è¨ˆç®—
+* @param[out] out åˆæˆå…ˆãƒ‡ãƒ¼ã‚¿
+* @param[in] in åˆæˆå…ƒãƒ‡ãƒ¼ã‚¿
+* @param[in] weight å…ƒãƒ‡ãƒ¼ã‚¿ã®åˆæˆå‰²åˆ
 */
 void Model::AddMorphVtxWeight(Vertex* out, MorphVertex in, float weight)
 {
-	out->pos.x += in.pos.x * weight;
-	out->pos.y += in.pos.y * weight;
-	out->pos.z += in.pos.z * weight;
-	out->normal.x += in.normal.x * weight;
-	out->normal.y += in.normal.y * weight;
-	out->normal.z += in.normal.z * weight;
-	out->uv.x += in.uv.x * weight;
-	out->uv.y += in.uv.y * weight;
+    out->pos.x += in.pos.x * weight;
+    out->pos.y += in.pos.y * weight;
+    out->pos.z += in.pos.z * weight;
+    out->normal.x += in.normal.x * weight;
+    out->normal.y += in.normal.y * weight;
+    out->normal.z += in.normal.z * weight;
+    out->uv.x += in.uv.x * weight;
+    out->uv.y += in.uv.y * weight;
 }
 

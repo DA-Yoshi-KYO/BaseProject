@@ -15,9 +15,9 @@
 std::string Model::GetError()
 {
 #ifdef _DEBUG
-	return m_errorStr;
+    return m_errorStr;
 #else
-	return "";
+    return "";
 #endif
 }
 
@@ -28,27 +28,27 @@ std::string Model::GetError()
 void Model::DrawBone(DirectX::XMMATRIX world)
 {
 #ifdef _DEBUG
-	// 再帰処理
-	std::function<void(int, DirectX::XMFLOAT3)> FuncDrawBone =
-		[&FuncDrawBone, this, &world](int idx, DirectX::XMFLOAT3 parent)
-	{
-		// 親ノードから現在位置まで描画
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMStoreFloat3(&pos, DirectX::XMVector3TransformCoord(DirectX::XMVectorZero(), m_nodes[idx].mat * world));
-		Geometory::AddLine(parent, pos, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+    // 再帰処理
+    std::function<void(int, DirectX::XMFLOAT3)> FuncDrawBone =
+        [&FuncDrawBone, this, &world](int idx, DirectX::XMFLOAT3 parent)
+    {
+        // 親ノードから現在位置まで描画
+        DirectX::XMFLOAT3 pos;
+        DirectX::XMStoreFloat3(&pos, DirectX::XMVector3TransformCoord(DirectX::XMVectorZero(), m_nodes[idx].mat * world));
+        Geometory::AddLine(parent, pos, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 
-		// 子ノードの描画
-		auto it = m_nodes[idx].children.begin();
-		while (it != m_nodes[idx].children.end())
-		{
-			FuncDrawBone(*it, pos);
-			++it;
-		}
-	};
+        // 子ノードの描画
+        auto it = m_nodes[idx].children.begin();
+        while (it != m_nodes[idx].children.end())
+        {
+            FuncDrawBone(*it, pos);
+            ++it;
+        }
+    };
 
-	// 描画実行
-	FuncDrawBone(0, DirectX::XMFLOAT3());
-	Geometory::DrawLines();
+    // 描画実行
+    FuncDrawBone(0, DirectX::XMFLOAT3());
+    Geometory::DrawLines();
 #endif
 }
 
@@ -59,12 +59,12 @@ void Model::DrawBone(DirectX::XMMATRIX world)
 */
 void Model::CheckAnimePlayLoop(AnimePlayInfo& info)
 {
-	if (info.isLoop) {
-		while (info.nowTime >= info.totalTime)
-		{
-			info.nowTime -= info.totalTime;
-		}
-	}
+    if (info.isLoop) {
+        while (info.nowTime >= info.totalTime)
+        {
+            info.nowTime -= info.totalTime;
+        }
+    }
 }
 
 /*
@@ -75,9 +75,9 @@ void Model::CheckAnimePlayLoop(AnimePlayInfo& info)
 */
 bool Model::IsError(bool condition, std::string message)
 {
-	if(condition)
-		SetErrorMessage(message);
-	return condition;
+    if(condition)
+        SetErrorMessage(message);
+    return condition;
 }
 
 /*
@@ -87,7 +87,7 @@ bool Model::IsError(bool condition, std::string message)
 void Model::SetErrorMessage(std::string message)
 {
 #ifdef _DEBUG
-	m_errorStr += message + "\n";
+    m_errorStr += message + "\n";
 #endif
 }
 
@@ -100,12 +100,12 @@ void Model::SetErrorMessage(std::string message)
 void Model::ShowErrorMessage(const char* caption, bool isWarning)
 {
 #ifdef _DEBUG
-	std::string msg = GetError();
-	if (msg.empty()) { return; }
-	if(isWarning)
-		MessageBox(NULL, msg.c_str(), (std::string("Warning - ") + caption).c_str(), MB_OK | MB_ICONWARNING);
-	else
-		MessageBox(NULL, msg.c_str(), (std::string("Error - ") + caption).c_str(), MB_OK | MB_ICONERROR);
+    std::string msg = GetError();
+    if (msg.empty()) { return; }
+    if(isWarning)
+        MessageBox(NULL, msg.c_str(), (std::string("Warning - ") + caption).c_str(), MB_OK | MB_ICONWARNING);
+    else
+        MessageBox(NULL, msg.c_str(), (std::string("Error - ") + caption).c_str(), MB_OK | MB_ICONERROR);
 #endif
 }
 
@@ -116,16 +116,16 @@ void Model::ShowErrorMessage(const char* caption, bool isWarning)
 */
 Model::NodeIndex Model::FindNode(const char* name)
 {
-	// 構築済みのボーンノードから該当ノードを取得
-	Model::Nodes::iterator it = std::find_if(m_nodes.begin(), m_nodes.end(),
-		[name](const Node& val) {
-			return val.name == name;
-		});
-	if (it == m_nodes.end()) {
-		return NODE_NONE;
-	}
+    // 構築済みのボーンノードから該当ノードを取得
+    Model::Nodes::iterator it = std::find_if(m_nodes.begin(), m_nodes.end(),
+        [name](const Node& val) {
+            return val.name == name;
+        });
+    if (it == m_nodes.end()) {
+        return NODE_NONE;
+    }
 
-	return static_cast<NodeIndex>(it - m_nodes.begin());
+    return static_cast<NodeIndex>(it - m_nodes.begin());
 }
 
 /*
@@ -135,41 +135,41 @@ Model::NodeIndex Model::FindNode(const char* name)
 */
 bool Model::CheckMeshFreeze(const void* ptr)
 {
-	// 再帰処理でAssimpのノード情報を読み取り
-	std::function<bool(std::string& name, aiNode*)> FuncFreezeCheck =
-		[&FuncFreezeCheck, this](std::string& name, aiNode* assimpNode)
-	{
-		std::string nodeName = assimpNode->mName.data;
-		if (nodeName.find(name) != std::string::npos)
-		{
-			if (fabsf(assimpNode->mTransformation.a4) > FLT_EPSILON) { return false; }
-			if (fabsf(assimpNode->mTransformation.b4) > FLT_EPSILON) { return false; }
-			if (fabsf(assimpNode->mTransformation.c4) > FLT_EPSILON) { return false; }
+    // 再帰処理でAssimpのノード情報を読み取り
+    std::function<bool(std::string& name, aiNode*)> FuncFreezeCheck =
+        [&FuncFreezeCheck, this](std::string& name, aiNode* assimpNode)
+    {
+        std::string nodeName = assimpNode->mName.data;
+        if (nodeName.find(name) != std::string::npos)
+        {
+            if (fabsf(assimpNode->mTransformation.a4) > FLT_EPSILON) { return false; }
+            if (fabsf(assimpNode->mTransformation.b4) > FLT_EPSILON) { return false; }
+            if (fabsf(assimpNode->mTransformation.c4) > FLT_EPSILON) { return false; }
 
-			return true;
-		}
+            return true;
+        }
 
-		for (UINT i = 0; i < assimpNode->mNumChildren; ++i)
-		{
-			if (!FuncFreezeCheck(name, assimpNode->mChildren[i]))
-				return false;
-		}
-		return true;
-	};
+        for (UINT i = 0; i < assimpNode->mNumChildren; ++i)
+        {
+            if (!FuncFreezeCheck(name, assimpNode->mChildren[i]))
+                return false;
+        }
+        return true;
+    };
 
-	const aiScene* pScene = reinterpret_cast<const aiScene*>(ptr);
-	bool result = true;
-	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-		std::string meshName = pScene->mMeshes[i]->mName.data;
+    const aiScene* pScene = reinterpret_cast<const aiScene*>(ptr);
+    bool result = true;
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        std::string meshName = pScene->mMeshes[i]->mName.data;
 
-		// ノード内を探索
-		if (!FuncFreezeCheck(meshName, pScene->mRootNode)) {
-			//SetErrorMessage("no mesh freeze. [" + meshName + "]");
-			//result = false;
-		}
-	}
+        // ノード内を探索
+        if (!FuncFreezeCheck(meshName, pScene->mRootNode)) {
+            //SetErrorMessage("no mesh freeze. [" + meshName + "]");
+            //result = false;
+        }
+    }
 
-	return result;
+    return result;
 }
 
 /*
@@ -179,15 +179,15 @@ bool Model::CheckMeshFreeze(const void* ptr)
 */
 bool Model::CheckAnimeNo(AnimeNo no)
 {
-	// パラメトリックアニメーション確認
-	if (no == PARAMETRIC_ANIME)
-	{
-		// パラメトリック用のデータが両方正しく設定されているか
-		return
-			m_parametric[0] != ANIME_NONE &&
-			m_parametric[1] != ANIME_NONE;
-	}
+    // パラメトリックアニメーション確認
+    if (no == PARAMETRIC_ANIME)
+    {
+        // パラメトリック用のデータが両方正しく設定されているか
+        return
+            m_parametric[0] != ANIME_NONE &&
+            m_parametric[1] != ANIME_NONE;
+    }
 
-	// 問題ないアニメーション番号かどうか
-	return 0 <= no && no < m_animes.size();
+    // 問題ないアニメーション番号かどうか
+    return 0 <= no && no < m_animes.size();
 }

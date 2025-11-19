@@ -4,132 +4,132 @@
 #include <assimp/postprocess.h>
 
 /*
-* @brief ƒƒbƒVƒ…”‚ğæ“¾
-* @return ƒƒbƒVƒ…”
+* @brief ãƒ¡ãƒƒã‚·ãƒ¥æ•°ã‚’å–å¾—
+* @return ãƒ¡ãƒƒã‚·ãƒ¥æ•°
 */
 unsigned int Model::GetMeshNum()
 {
-	return static_cast<int>(m_meshes.size());
+    return static_cast<int>(m_meshes.size());
 }
 
 /*
-* @brief ƒƒbƒVƒ…î•ñ‚ğæ“¾
-* @param[in] index æ“¾‚·‚éƒƒbƒVƒ…”Ô†
-* @return ƒƒbƒVƒ…î•ñ
+* @brief ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±ã‚’å–å¾—
+* @param[in] index å–å¾—ã™ã‚‹ãƒ¡ãƒƒã‚·ãƒ¥ç•ªå·
+* @return ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±
 */
 const Model::Mesh* Model::GetMesh(unsigned int index)
 {
-	if (index < GetMeshNum())
-		return &m_meshes[index];
-	return nullptr;
+    if (index < GetMeshNum())
+        return &m_meshes[index];
+    return nullptr;
 }
 
 /*
-* @brief ƒ}ƒeƒŠƒAƒ‹”‚ğæ“¾
-* @return ƒ}ƒeƒŠƒAƒ‹”
+* @brief ãƒãƒ†ãƒªã‚¢ãƒ«æ•°ã‚’å–å¾—
+* @return ãƒãƒ†ãƒªã‚¢ãƒ«æ•°
 */
 unsigned int Model::GetMaterialNum()
 {
-	return static_cast<int>(m_materials.size());
+    return static_cast<int>(m_materials.size());
 }
 
 /*
-* @brief ƒ}ƒeƒŠƒAƒ‹î•ñ‚ğæ“¾
-* @param[in] index æ“¾‚·‚éƒ}ƒeƒŠƒAƒ‹”Ô†
-* @return ƒ}ƒeƒŠƒAƒ‹î•ñ
+* @brief ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±ã‚’å–å¾—
+* @param[in] index å–å¾—ã™ã‚‹ãƒãƒ†ãƒªã‚¢ãƒ«ç•ªå·
+* @return ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±
 */
 const Model::Material* Model::GetMaterial(unsigned int index)
 {
-	if (index < GetMaterialNum())
-		return &m_materials[index];
-	return nullptr;
+    if (index < GetMaterialNum())
+        return &m_materials[index];
+    return nullptr;
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“Œã‚Ì•ÏŠ·s—ñæ“¾
-* @param[in] index ƒ{[ƒ“”Ô†
-* @return ŠY“–ƒ{[ƒ“‚Ì•ÏŠ·s—ñ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¾Œã®å¤‰æ›è¡Œåˆ—å–å¾—
+* @param[in] index ãƒœãƒ¼ãƒ³ç•ªå·
+* @return è©²å½“ãƒœãƒ¼ãƒ³ã®å¤‰æ›è¡Œåˆ—
 */
 DirectX::XMMATRIX Model::GetBoneMatrix(NodeIndex index)
 {
-	if (index < m_nodes.size())
-		return m_nodes[index].mat;
-	return DirectX::XMMatrixIdentity();
+    if (index < m_nodes.size())
+        return m_nodes[index].mat;
+    return DirectX::XMMatrixIdentity();
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶”»’è
-* @param[in] no ƒAƒjƒ[ƒVƒ‡ƒ“”Ô†
-* @return Ä¶ó‹µ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿåˆ¤å®š
+* @param[in] no ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·
+* @return å†ç”ŸçŠ¶æ³
 */
 bool Model::IsAnimePlay(AnimeNo no)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN
-	if (!CheckAnimeNo(no)) { return false; }
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+    if (!CheckAnimeNo(no)) { return false; }
 
-	// ƒpƒ‰ƒƒgƒŠƒbƒN‚Í‡¬Œ³‚ÌƒAƒjƒ‚ğŠî€‚É”»’f
-	if (no == PARAMETRIC_ANIME) { no = m_parametric[0]; }
+    // ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯ã¯åˆæˆå…ƒã®ã‚¢ãƒ‹ãƒ¡ã‚’åŸºæº–ã«åˆ¤æ–­
+    if (no == PARAMETRIC_ANIME) { no = m_parametric[0]; }
 
-	// Ä¶ŠÔ‚Ì”»’è
-	if (m_animes[no].info.totalTime < m_animes[no].info.nowTime) { return false; }
+    // å†ç”Ÿæ™‚é–“ã®åˆ¤å®š
+    if (m_animes[no].info.totalTime < m_animes[no].info.nowTime) { return false; }
 
-	// ‚»‚ê‚¼‚ê‚ÌÄ¶”Ô†‚Éİ’è‚³‚ê‚Ä‚¢‚é‚©Šm”F
-	if (m_playNo == no) { return true; }
-	if (m_blendNo == no) { return true; }
-	if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
-	{
-		if (m_parametric[0] == no) { return true; }
-		if (m_parametric[1] == no) { return true; }
-	}
+    // ãã‚Œãã‚Œã®å†ç”Ÿç•ªå·ã«è¨­å®šã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
+    if (m_playNo == no) { return true; }
+    if (m_blendNo == no) { return true; }
+    if (m_playNo == PARAMETRIC_ANIME || m_blendNo == PARAMETRIC_ANIME)
+    {
+        if (m_parametric[0] == no) { return true; }
+        if (m_parametric[1] == no) { return true; }
+    }
 
-	// Ä¶’†‚Å‚È‚¢
-	return false;
+    // å†ç”Ÿä¸­ã§ãªã„
+    return false;
 }
 
 /*
-* @brief Ä¶’†‚Ì”Ô†‚Ìæ“¾
-* @return ƒAƒjƒ”Ô†
+* @brief å†ç”Ÿä¸­ã®ç•ªå·ã®å–å¾—
+* @return ã‚¢ãƒ‹ãƒ¡ç•ªå·
 */
 Model::AnimeNo Model::GetAnimePlayNo()
 {
-	return m_playNo;
+    return m_playNo;
 }
 
 /*
-* @brief Ä¶’†‚ÌƒuƒŒƒ“ƒhƒAƒjƒ‚Ìæ“¾
-* @return ƒAƒjƒ”Ô†
+* @brief å†ç”Ÿä¸­ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¢ãƒ‹ãƒ¡ã®å–å¾—
+* @return ã‚¢ãƒ‹ãƒ¡ç•ªå·
 */
 Model::AnimeNo Model::GetAnimeBlendNo()
 {
-	return m_blendNo;
+    return m_blendNo;
 }
 
 /*
-* @brief ƒAƒjƒ[ƒVƒ‡ƒ“î•ñæ“¾
-* @return ƒAƒjƒ[ƒVƒ‡ƒ“î•ñ
+* @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±å–å¾—
+* @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
 */
 const Model::AnimePlayInfo* Model::GetPlayAnimeInfo()
 {
-	AnimeNo no = GetAnimePlayNo();
-	if (!CheckAnimeNo(no)) { return nullptr; }
-	return &m_animes[no].info;
+    AnimeNo no = GetAnimePlayNo();
+    if (!CheckAnimeNo(no)) { return nullptr; }
+    return &m_animes[no].info;
 }
 
 /*
-* @brief ƒfƒBƒŒƒNƒgƒŠî•ñ‚Ìæ“¾
-* @param[in] file ƒtƒ@ƒCƒ‹ƒpƒX
-* @return ƒfƒBƒŒƒNƒgƒŠ•”•ª‚Ìî•ñ
+* @brief ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªæƒ…å ±ã®å–å¾—
+* @param[in] file ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
+* @return ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªéƒ¨åˆ†ã®æƒ…å ±
 */
 std::string Model::GetDirectory(const char* file)
 {
-	// ƒfƒBƒŒƒNƒgƒŠ‚Ì“Ç‚İæ‚è
-	std::string directory = file;
-	auto strIt = directory.begin();
-	while (strIt != directory.end()) {
-		if (*strIt == '/')
-			*strIt = '\\';
-		++strIt;
-	}
-	directory = directory.substr(0, directory.find_last_of('\\') + 1);
-	return directory;
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®èª­ã¿å–ã‚Š
+    std::string directory = file;
+    auto strIt = directory.begin();
+    while (strIt != directory.end()) {
+        if (*strIt == '/')
+            *strIt = '\\';
+        ++strIt;
+    }
+    directory = directory.substr(0, directory.find_last_of('\\') + 1);
+    return directory;
 }

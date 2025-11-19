@@ -6,24 +6,24 @@
 
 HRESULT Init(HWND hWnd, UINT width, UINT height)
 {
-	HRESULT hr;
-	// DirectX初期化
-	hr = InitDirectX(hWnd, width, height, false);
-	// 初期化の例
-	if (FAILED(hr)) { return hr; }
+    HRESULT hr;
+    // DirectX初期化
+    hr = InitDirectX(hWnd, width, height, false);
+    // 初期化の例
+    if (FAILED(hr)) { return hr; }
 
-	Geometory::Init();
-	Sprite::Init();
+    Geometory::Init();
+    Sprite::Init();
 
-	return hr;
+    return hr;
 }
 
 void Uninit()
 {
-	Sprite::Uninit();
-	Geometory::Uninit();
+    Sprite::Uninit();
+    Geometory::Uninit();
 
-	UninitDirectX();
+    UninitDirectX();
 }
 
 void Update()
@@ -33,7 +33,7 @@ void Update()
 
 void Draw()
 {
-	BeginDrawDirectX();
+    BeginDrawDirectX();
 
-	EndDrawDirectX();
+    EndDrawDirectX();
 }
